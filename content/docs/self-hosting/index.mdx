@@ -1,0 +1,16 @@
+---
+title: Self-host PutSMS
+description: Own the Worker, database, realtime channel, queue, and web console.
+---
+
+Self-hosting places the API, metadata, encrypted content, and operational controls in your Cloudflare account. It requires a Worker, D1 database, Durable Object, Queue, and a static Dashboard deployment.
+
+<Cards>
+  <Card title="Local development" description="Run the API, migrations, Dashboard, and clients locally." href="/docs/self-hosting/local-development" />
+  <Card title="Production deployment" description="Configure bindings, secrets, domains, CORS, OAuth, and APNs." href="/docs/self-hosting/deployment" />
+  <Card title="Operations" description="Upgrade, observe, back up, and verify the service." href="/docs/self-hosting/operations" />
+</Cards>
+
+You need a Cloudflare account with Workers, D1, Durable Objects, Queues, and Pages (or another static host); a domain with HTTPS; Node.js and package managers used by the repositories; and Apple credentials only when building iOS or enabling APNs.
+
+<Callout title="Choose your trust model">Self-hosting controls where the service runs. Enable client E2EE as a separate choice when the Worker must not be able to read supported message uploads.</Callout>

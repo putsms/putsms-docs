@@ -1,0 +1,48 @@
+---
+title: What is PutSMS?
+description: The problem PutSMS solves, its principles, and its security model.
+---
+
+PutSMS is a lightweight system for collecting SMS from devices you control and making those messages available across your own clients.
+
+## The problem
+
+An SMS may arrive on a phone left at home, a dedicated Android handset, or a cellular module in a remote location. The message is useful somewhere else, but the SIM and receiving device remain the only place it can be read. Forwarding individual messages manually does not scale, and opaque third-party forwarding services weaken control over sensitive content.
+
+PutSMS creates one controlled path from those receiving devices to the places where you work.
+
+## Product principles
+
+1. **Put messages where they are useful.** Read, search, and receive notifications across supported clients.
+2. **Keep control.** Device credentials, deployment, and private keys remain under your control.
+3. **Work locally first.** The iOS app stores messages in local GRDB and synchronizes when cloud access is available.
+4. **Fail clearly.** Device state, sync diagnostics, and encryption status are visible instead of silently hiding failures.
+5. **Stay deployable.** The backend uses Cloudflare primitives and the Dashboard is a static web app.
+
+## What makes it different
+
+### Multiple sources, one inbox
+
+iOS Shortcuts and App Intents, Android SmsForwarder, and Air780EPM devices can all deliver messages into the same account.
+
+### Cross-device delivery
+
+Incremental synchronization keeps iOS clients current. Durable Objects provide live events to the Dashboard and browser extension, while an APNs queue delivers iOS notifications.
+
+### End-to-end encryption where supported
+
+An iOS sender can encrypt each message with AES-256-GCM and wrap the message key for registered recipients using RSA-OAEP-SHA256. Private keys stay in the receiving browser or app. Enabling **Require encrypted uploads** makes encryption mandatory and stops the upload when no recipient key is available.
+
+This protection is not implied for every source: Android webhook and Air780EPM ingestion currently send plaintext JSON inside HTTPS.
+
+### Self-hosting without a monolith
+
+The API runs as a Cloudflare Worker with D1, Durable Objects, and Queues. The Dashboard deploys independently as a static React application, so each part can be upgraded and operated separately.
+
+## Next steps
+
+<Cards>
+  <Card title="Get started" description="Connect a device and verify the first message." href="/docs/getting-started" />
+  <Card title="Understand the architecture" description="Follow data, credentials, and encryption keys through the system." href="/docs/architecture" />
+  <Card title="Self-host" description="Deploy and operate your own PutSMS stack." href="/docs/self-hosting" />
+</Cards>

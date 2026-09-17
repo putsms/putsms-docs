@@ -1,0 +1,48 @@
+---
+title: 什么是 PutSMS？
+description: PutSMS 要解决的问题、产品原则与安全模型。
+---
+
+PutSMS 是一套轻量的短信汇集与同步系统。它从你控制的设备采集短信，并让这些短信能够安全地出现在你自己的其他客户端中。
+
+## 要解决的问题
+
+短信可能到达留在家里的手机、专用 Android 手机，或部署在远处的蜂窝通信模块。真正需要使用短信的人在别处，但 SIM 卡和收信设备仍是唯一可以读取它的地方。逐条手动转发无法扩展，而不透明的第三方转发服务会削弱用户对敏感内容的控制。
+
+PutSMS 在收信设备和实际工作位置之间建立一条由用户控制的路径。
+
+## 产品原则
+
+1. **让短信出现在有用的地方。** 在受支持的客户端中查看、搜索并接收通知。
+2. **控制权属于用户。** 设备凭据、部署位置和私钥均由用户管理。
+3. **本地优先。** iOS App 使用本地 GRDB 保存短信，在云端可用时同步。
+4. **故障必须可见。** 设备状态、同步诊断和加密状态都应明确展示。
+5. **保持可部署性。** 后端使用 Cloudflare 原生组件，Dashboard 是独立静态 Web 应用。
+
+## PutSMS 的亮点
+
+### 多种来源，一个收件箱
+
+iOS 快捷指令与 App Intent、Android SmsForwarder 和 Air780EPM 都可以把短信送入同一个账号。
+
+### 跨设备送达
+
+增量同步让 iOS 客户端保持最新；Durable Objects 为 Dashboard 和浏览器扩展提供实时事件；APNs 队列负责 iOS 推送。
+
+### 在支持的来源上启用端到端加密
+
+iOS 发送端可以使用 AES-256-GCM 加密每条短信，再通过 RSA-OAEP-SHA256 为已注册的接收端包装消息密钥。私钥只保存在接收短信的浏览器或 App 中。开启 **Require encrypted uploads** 后，加密将成为硬性要求；没有可用接收端公钥时上传会停止。
+
+这不代表所有来源都默认 E2EE：Android Webhook 和 Air780EPM 当前通过 HTTPS 传输明文 JSON。
+
+### 无需大型单体服务即可自部署
+
+API 运行在 Cloudflare Worker 上，并使用 D1、Durable Objects 和 Queues。Dashboard 作为静态 React 应用独立部署，各组件可以分别升级和运维。
+
+## 下一步
+
+<Cards>
+  <Card title="开始使用" description="连接设备并验证第一条短信。" href="/zh/docs/getting-started" />
+  <Card title="理解系统架构" description="了解数据、凭据和加密密钥如何在系统中流动。" href="/zh/docs/architecture" />
+  <Card title="自部署" description="部署并运维自己的 PutSMS。" href="/zh/docs/self-hosting" />
+</Cards>

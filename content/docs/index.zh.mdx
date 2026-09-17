@@ -1,0 +1,75 @@
+---
+title: PutSMS
+description: 安全地同步短信，让你可以在需要的地方访问它们。
+---
+
+短信、验证码和设备通知不应该被困在某一台手机、某一张 SIM 卡或某一个通信模块里。PutSMS 将你控制的设备收到的短信汇集到一个可搜索、可同步的工作空间。
+
+<Cards>
+  <Card title="开始使用 PutSMS" description="连接一台设备并接收第一条短信。" href="/zh/docs/getting-started" />
+  <Card title="自部署 PutSMS" description="在自己的 Cloudflare 账号中部署 API 和 Dashboard。" href="/zh/docs/self-hosting" />
+</Cards>
+
+## 为什么做 PutSMS
+
+PutSMS 的初心来自一个实际问题：重要短信应当在需要它的地方可用，同时设备、凭据、部署位置和保护数据的私钥仍由用户掌控。
+
+- 从 iOS 快捷指令与 App Intent、Android SmsForwarder 或 Air780EPM 硬件采集短信。
+- 在 Dashboard、iOS App 或浏览器扩展中查看和搜索。
+- 通过本地优先存储和增量同步，在网络波动时继续工作。
+- 当所有接收端都准备好公钥时，启用端到端加密上传。
+- 将云端组件部署到自己的 Cloudflare 账号。
+
+<Callout title="加密能力取决于消息来源">
+  iOS 可以强制使用 E2EE 上传，并在没有可用公钥时拒绝上传。Android Webhook 和当前阶段的 Air780EPM 使用 HTTPS 传输明文 JSON。选择模式前请阅读加密指南。
+</Callout>
+
+## 系统一览
+
+<Mermaid
+  label="PutSMS 整体架构与主要数据流"
+  chart={`flowchart LR
+    subgraph Sources[短信来源]
+      IOS[iOS 快捷指令与 App Intent]
+      AND[Android SmsForwarder]
+      AIR[Air780EPM]
+    end
+    subgraph Cloud[你的 PutSMS 云端]
+      AUTH[会话与 Device Key 鉴权]
+      API[Cloudflare Worker API]
+      D1[(D1 消息存储)]
+      RT[Durable Objects 与 SSE]
+      Q[APNs 队列]
+    end
+    subgraph Clients[阅读端]
+      APP[iOS App]
+      DASH[Dashboard]
+      EXT[浏览器扩展]
+    end
+    IOS -->|同步上传；可选 E2EE| AUTH
+    AND -->|HTTPS Webhook| AUTH
+    AIR -->|HTTPS Webhook| AUTH
+    AUTH --> API
+    API --> D1
+    API --> RT
+    API --> Q
+    D1 -->|同步拉取| APP
+    RT -->|实时更新| DASH
+    RT -->|实时更新| EXT
+    Q -->|推送通知| APP
+    APP -. 公钥 .-> API
+    DASH -. 公钥 .-> API
+    EXT -. 本地解密 .-> D1`}
+/>
+
+阅读[什么是 PutSMS？](/zh/docs/introduction)了解产品原则，或阅读[系统架构](/zh/docs/architecture)了解信任边界与数据流。
+
+## 项目参考
+
+<Cards>
+  <Card title="iOS App" description="本地存储、快捷指令、同步、推送与加密。" href="/zh/docs/app" />
+  <Card title="API" description="Worker 接口、D1、实时事件与 APNs。" href="/zh/docs/api" />
+  <Card title="Dashboard" description="账号、设备、短信、联系人和密钥。" href="/zh/docs/dashboard" />
+  <Card title="浏览器扩展" description="持续事件连接、通知与本地密钥。" href="/zh/docs/browser-extension" />
+  <Card title="Air780EPM" description="通过 LuatOS 硬件可靠转发短信。" href="/zh/docs/air780epm" />
+</Cards>

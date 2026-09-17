@@ -1,0 +1,46 @@
+---
+title: 快速开始
+description: 创建账号、连接设备并接收第一条短信。
+---
+
+本指南使用托管版 Dashboard。自部署用户应先[部署完整服务](/zh/docs/self-hosting/deployment)，并将文中的 Dashboard 和 API 地址替换为自己的域名。
+
+<Steps>
+
+### 创建账号
+
+打开 Dashboard，通过邮箱和密码注册，或使用已配置的 Google 登录。登录后才能创建设备。
+
+### 添加设备
+
+进入 **Devices**，选择 **Add device**，填写容易识别的名称并选择平台。PutSMS 会生成 Device Key 和配置二维码。
+
+<Callout type="warn" title="立即保存凭据">
+  Device Key 只在配置过程中展示。请像密码一样保护它，不要放入源码、截图、聊天或日志。如果发生泄露，请在 Dashboard 中轮换凭据。
+</Callout>
+
+### 配置短信来源
+
+选择对应指南：
+
+- [iOS App 与快捷指令](/zh/docs/guides/ios)
+- [Android SmsForwarder](/zh/docs/guides/android)
+- [Air780EPM](/zh/docs/guides/air780epm)
+
+iOS App 可以扫描配置二维码；基于 Webhook 的客户端使用生成的 Put URL。
+
+### 确认连接
+
+返回 **Devices** 检查配置状态。客户端成功导入配置后会向 API 确认绑定。如果一直处于等待状态，请检查 API 地址和 Device Key。
+
+### 发送测试短信
+
+运行已配置的快捷指令、转发一条 Android 短信，或向 Air780EPM 的 SIM 卡发送短信。打开 Dashboard 的 **Messages**，核对发送方、正文、接收时间和来源设备。
+
+### 添加阅读端
+
+配置[浏览器扩展](/zh/docs/guides/browser-extension)以持续接收通知，或绑定另一台 iOS 设备进行同步访问。
+
+</Steps>
+
+如果短信包含敏感内容，请在开启强制加密上传前继续阅读[端到端加密](/zh/docs/guides/encryption)。

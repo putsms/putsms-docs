@@ -1,0 +1,37 @@
+---
+title: PutSMS for Air780EPM
+description: 在 Air780EPM 上可靠地接收短信并上传至 PutSMS。
+---
+
+该 LuatOS 应用收到短信后将其可靠上传至 PutSMS。失败任务保存在设备文件系统，重启或网络恢复后继续补传。
+
+<Callout type="warn" title="第一阶段安全边界">当前使用设备专属 Put URL，通过 HTTPS 上传明文 JSON；待上传短信也以明文保存在 `/putsms_queue.json`。应用层加密属于后续阶段。</Callout>
+
+## 配置
+
+1. 在 Dashboard 创建平台为 `embedded` 的设备。
+2. 复制 `https://<api>/put/<device-key>` 格式的 Put URL。
+3. 在 `putsms_config.lua` 中设置完整 `put_url`，生产环境保持 `allow_insecure_http = false`。
+4. 使用 Luatools 将 Lua 文件和 V2018 或更高版本固件烧录。
+5. 等待蜂窝网络和 SNTP 就绪，再发送测试短信。
+
+```lua
+return {
+  put_url = "https://api.putsms.com/put/<device-key>",
+  allow_insecure_http = false,
+  request_timeout_ms = 15000,
+  queue_max_items = 500,
+  queue_max_bytes = 512 * 1024,
+}
+```
+
+## 故障处理
+
+- `putsms.config.invalid`：Put URL 为空、格式或协议错误。
+- `putsms.upload.auth_failed`：Device Key 已失效、撤销或轮换。
+- `putsms.upload.retry`：网络、超时、限流或服务端临时错误，将自动退避重试。
+- `putsms.upload.rejected`：字段错误或重复 ID 内容冲突，任务会暂停。
+- `putsms.queue.full`：队列达到 500 条或 512 KiB。
+- `putsms.queue.corrupt`：主队列和备份均无法解析，应保留文件排查。
+
+日志不会输出完整短信正文或 Put URL。不要将真实配置、队列文件或设备日志提交到版本库。

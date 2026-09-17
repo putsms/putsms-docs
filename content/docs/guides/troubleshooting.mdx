@@ -1,0 +1,18 @@
+---
+title: Troubleshooting
+description: Diagnose configuration, synchronization, notification, and encryption problems.
+---
+
+| Symptom | Check |
+| --- | --- |
+| Device stays pending | API origin reachability, QR/config values, and Device Key validity |
+| `401` or `403` | Key copied in full, not revoked, and belongs to the selected API origin |
+| Messages do not sync | Network, pending local records, system background permissions, and API logs |
+| Dashboard does not update live | SSE request to `/api/v1/events`, CORS origin, then polling fallback |
+| No iOS notification | Notification permission, APNs registration, queue consumer, APNs environment/topic |
+| Encrypted message is unreadable | Matching local private key and recovery backup for that message |
+| Required encrypted upload fails | At least one active compatible reader public key must be registered |
+
+Rotate exposed Device Keys rather than retrying them. Do not post message bodies, Put URLs, private keys, or complete request headers in support logs.
+
+For self-hosted systems, also inspect Worker logs, Queue failures, D1 migration state, and the [deployment checklist](/docs/self-hosting/deployment).

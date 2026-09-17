@@ -1,0 +1,16 @@
+---
+title: 自部署 PutSMS
+description: 自主管理 Worker、数据库、实时通道、队列和 Web 控制台。
+---
+
+自部署会将 API、元数据、加密内容和运维控制放到你的 Cloudflare 账号中。完整系统需要 Worker、D1 数据库、Durable Object、Queue 和静态 Dashboard。
+
+<Cards>
+  <Card title="本地开发" description="在本地运行 API、迁移、Dashboard 和客户端。" href="/zh/docs/self-hosting/local-development" />
+  <Card title="生产部署" description="配置绑定、Secrets、域名、CORS、OAuth 和 APNs。" href="/zh/docs/self-hosting/deployment" />
+  <Card title="日常运维" description="升级、观测、备份和验证服务。" href="/zh/docs/self-hosting/operations" />
+</Cards>
+
+你需要支持 Workers、D1、Durable Objects、Queues 和 Pages（或其他静态托管）的 Cloudflare 账号、启用 HTTPS 的域名、各仓库所需的 Node.js 与包管理器；仅在构建 iOS 或启用 APNs 时需要 Apple 凭据。
+
+<Callout title="选择信任模型">自部署决定服务运行位置。若不希望 Worker 读取受支持来源上传的短信，还需单独启用客户端 E2EE。</Callout>

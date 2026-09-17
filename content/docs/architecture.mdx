@@ -1,0 +1,59 @@
+---
+title: Architecture
+description: Components, data flows, and security boundaries in PutSMS.
+---
+
+PutSMS separates message capture, cloud coordination, and reading clients. You can deploy the cloud components in your own Cloudflare account; clients keep their own credentials and, when E2EE is enabled, private keys.
+
+<Mermaid label="Detailed PutSMS architecture showing upload, sync, realtime, push, and key distribution" chart={`flowchart TB
+  subgraph Input[Message input]
+    SI[iOS Shortcuts / App Intents]
+    SA[Android SmsForwarder]
+    SH[Air780EPM]
+  end
+  subgraph Edge[Cloudflare account]
+    AU[Session / Device Key auth]
+    WK[Worker API]
+    DB[(D1)]
+    DO[Durable Object / SSE]
+    QU[APNs Queue]
+  end
+  subgraph Readers[Reading clients]
+    IA[iOS App + local GRDB]
+    DA[Dashboard]
+    EX[Browser Extension]
+  end
+  SI -->|upload + sync; optional E2EE| AU
+  SA -->|plaintext JSON over HTTPS| AU
+  SH -->|plaintext JSON over HTTPS| AU
+  AU --> WK
+  WK -->|store / query| DB
+  WK -->|publish event| DO
+  WK -->|enqueue notification| QU
+  DB -->|incremental sync| IA
+  DO -->|SSE realtime| DA
+  DO -->|SSE realtime| EX
+  QU -->|APNs| IA
+  IA -. public key .-> WK
+  DA -. public key .-> WK
+  WK -. wrapped message keys .-> IA
+  WK -. wrapped message keys .-> DA
+  WK -. wrapped message keys .-> EX`}/>
+
+## Data flows
+
+- **Upload:** a source authenticates with its Device Key. iOS can upload an AES-256-GCM ciphertext; Android and Air780EPM currently upload plaintext JSON through HTTPS.
+- **Sync:** the iOS app pushes pending local GRDB records and pulls changes incrementally. This is independent of CloudKit.
+- **Realtime:** the Worker publishes account events through a Durable Object and SSE. Dashboard and browser extension refresh message state from the API.
+- **Push:** the Worker queues APNs delivery for eligible iOS devices. Treat notification content according to the encryption mode you deploy.
+- **Key distribution:** reading clients register public keys. A message key is wrapped with RSA-OAEP-SHA256 for each reader; private keys never need to leave the client.
+
+## Trust boundaries
+
+<Callout type="warn" title="E2EE is not universal by default">
+  **Require encrypted uploads** on iOS fails closed if no usable recipient public key exists. Android SmsForwarder and the current Air780EPM implementation do not perform application-layer encryption. HTTPS protects them in transit, and server-side encryption protects stored plaintext, but the Worker can process that plaintext.
+</Callout>
+
+Device Keys authenticate source devices and can be rotated independently. Browser sessions authenticate people. `SMS_ENCRYPTION_KEY` protects service-managed data at rest; it is not a substitute for E2EE because the service possesses that key.
+
+For operational setup, continue to [Self-host PutSMS](/docs/self-hosting). For client key management, read [End-to-end encryption](/docs/guides/encryption).

@@ -1,13 +1,75 @@
 ---
-title: Hello World
-description: Your first document
+title: PutSMS
+description: Put your SMS anywhere with secure, cross-device synchronization.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
-
-## What is Next?
+SMS messages, verification codes, and device alerts should not be trapped on one phone, SIM card, or modem. PutSMS brings messages from the devices you control into one searchable, synchronized workspace.
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Use PutSMS" description="Connect a device and receive your first message." href="/docs/getting-started" />
+  <Card title="Self-host PutSMS" description="Deploy the API and Dashboard on your own Cloudflare account." href="/docs/self-hosting" />
+</Cards>
+
+## Why PutSMS
+
+PutSMS began with a practical goal: make important SMS available where you need it without surrendering control of the devices, credentials, deployment, or private keys that protect it.
+
+- Collect messages from iOS Shortcuts and App Intents, Android SmsForwarder, or Air780EPM hardware.
+- Read and search them from the Dashboard, iOS app, or browser extension.
+- Keep working through local-first storage and incremental synchronization.
+- Enable end-to-end encrypted uploads when every intended reader has a public key.
+- Run the cloud components in your own Cloudflare account.
+
+<Callout title="Encryption is capability-aware">
+  iOS can require E2EE uploads and fail closed when no usable public key exists. Android webhooks and the current Air780EPM client send plaintext JSON over HTTPS. See the encryption guide before choosing a mode.
+</Callout>
+
+## System at a glance
+
+<Mermaid
+  label="PutSMS system architecture and primary data flows"
+  chart={`flowchart LR
+    subgraph Sources[Message sources]
+      IOS[iOS Shortcuts and App Intents]
+      AND[Android SmsForwarder]
+      AIR[Air780EPM]
+    end
+    subgraph Cloud[Your PutSMS cloud]
+      AUTH[Session and Device Key auth]
+      API[Cloudflare Worker API]
+      D1[(D1 message store)]
+      RT[Durable Objects and SSE]
+      Q[APNs Queue]
+    end
+    subgraph Clients[Reading clients]
+      APP[iOS App]
+      DASH[Dashboard]
+      EXT[Browser Extension]
+    end
+    IOS -->|sync push; optional E2EE| AUTH
+    AND -->|HTTPS webhook| AUTH
+    AIR -->|HTTPS webhook| AUTH
+    AUTH --> API
+    API --> D1
+    API --> RT
+    API --> Q
+    D1 -->|sync pull| APP
+    RT -->|live update| DASH
+    RT -->|live update| EXT
+    Q -->|push notification| APP
+    APP -. public keys .-> API
+    DASH -. public keys .-> API
+    EXT -. local decryption .-> D1`}
+/>
+
+Read [What is PutSMS?](/docs/introduction) for the product principles or [Architecture](/docs/architecture) for trust boundaries and data flows.
+
+## Choose a reference
+
+<Cards>
+  <Card title="iOS App" description="Local storage, Shortcuts, sync, push, and encryption." href="/docs/app" />
+  <Card title="API" description="Worker endpoints, D1, realtime events, and APNs." href="/docs/api" />
+  <Card title="Dashboard" description="Accounts, devices, messages, contacts, and keys." href="/docs/dashboard" />
+  <Card title="Browser Extension" description="Persistent events, notifications, and local keys." href="/docs/browser-extension" />
+  <Card title="Air780EPM" description="Reliable SMS forwarding from LuatOS hardware." href="/docs/air780epm" />
 </Cards>

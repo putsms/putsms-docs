@@ -1,0 +1,6 @@
+{
+  "title": "API",
+  "description": "PutSMS Cloudflare Worker 后端",
+  "root": true,
+  "pages": ["index"]
+}

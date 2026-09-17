@@ -1,0 +1,80 @@
+---
+title: PutSMS API
+description: The Cloudflare Worker backend, D1 data store, and device sync API.
+---
+
+Backend API for PutSMS. This project owns the Cloudflare Worker, D1 migrations, Durable Object bindings, Queue bindings, and backend environment.
+
+## Local Development
+
+```sh
+npm install
+npm run db:migrate:local
+npm run dev
+```
+
+To run local migrations automatically before starting the dev server:
+
+```sh
+npm run dev:migrated
+```
+
+The Worker runs on `http://localhost:8787` by default. Start the frontend from `../putsms-dash` with:
+
+```sh
+VITE_API_BASE_URL=http://localhost:8787 pnpm dev
+```
+
+## Environment
+
+Configured in `wrangler.jsonc` for local development:
+
+- `DB`: D1 database binding.
+- `APP_ENV`: `development` locally, `production` in production.
+- `SMS_ENCRYPTION_KEY`: message encryption key.
+- `SESSION_SECRET`: session signing secret.
+- `SESSION_COOKIE_NAME`: browser session cookie name.
+- `REPORT_RATE_LIMITER`: rate-limit binding for device message reports, keyed by Device Key hash and source IP.
+- `GOOGLE_CLIENT_ID`: Google OAuth client ID.
+- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret, set as a secret outside `wrangler.jsonc`.
+- `GOOGLE_REDIRECT_URI`: backend callback URL.
+- `FRONTEND_BASE_URL`: frontend origin for post-OAuth redirects.
+- `APNS_TOPIC`, `APNS_ENV`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`: APNs settings.
+- `ALLOWED_ORIGINS`: comma-separated frontend origins allowed by CORS.
+
+For production, set sensitive values with `wrangler secret put`. `SMS_ENCRYPTION_KEY` and `SESSION_SECRET` are required for deployment. Google OAuth and APNs secrets are optional at deploy time so the Worker can be released without those integrations, but the related features stay disabled until the secrets exist:
+
+```sh
+pnpm exec wrangler secret put SMS_ENCRYPTION_KEY
+pnpm exec wrangler secret put SESSION_SECRET
+pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm exec wrangler secret put APNS_KEY_ID
+pnpm exec wrangler secret put APNS_TEAM_ID
+pnpm exec wrangler secret put APNS_PRIVATE_KEY
+```
+
+## Commands
+
+- `npm run dev`: run the Worker locally on port `8787`.
+- `npm run dev:migrated`: apply local D1 migrations, then run the Worker locally.
+- `npm run typecheck`: generate Wrangler types and run TypeScript.
+- `npm test`: run backend unit/integration tests.
+- `npm run db:migrate:local`: apply local D1 migrations locally.
+- `npm run db:migrate:remote`: apply remote D1 migrations.
+- `npm run deploy`: deploy the Worker.
+- `npm run deploy:migrated`: apply remote D1 migrations, then deploy the Worker.
+
+Cloudflare deploy commands can use `npm run deploy:migrated` when schema changes should be applied automatically during production deployment. Use `npm run db:migrate:local` or `npm run dev:migrated` for local development.
+
+## Notes
+
+This Worker does not serve the React frontend. Static routes and assets live in `../putsms-dash`.
+
+Devices report messages with the Device Key returned once when the device is created or its credentials are rotated:
+
+```http
+POST /api/v1/messages
+Authorization: Bearer <deviceKey>
+```
+
+Hardware that cannot set request headers can use `POST /put/:deviceKey`. Both endpoints accept JSON or form-encoded `sender` and `content` fields and share the same validation and storage path.

@@ -1,0 +1,55 @@
+---
+title: PutSMS Dashboard
+description: The web console for accounts, devices, and SMS search.
+---
+
+Dashboard frontend for PutSMS. This project is deployed as Cloudflare Pages and talks to the backend Worker in `../putsms-api`.
+
+## Local Development
+
+1. Start the backend:
+
+```sh
+cd ../putsms-api
+npm run dev
+```
+
+2. Start the frontend:
+
+```sh
+cd ../putsms-dash
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## Environment
+
+- `VITE_API_BASE_URL`: backend Worker origin. Local example: `http://localhost:8787`. LAN or Tailscale example: `http://100.99.240.60:8787`. Production example: your deployed Worker URL.
+
+Development requires `VITE_API_BASE_URL` in `.env` because the frontend calls the Worker directly. The Vite dev server does not proxy `/api` requests.
+
+Example `.env`:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8787
+```
+
+If you open the frontend from another device, use an API origin that device can reach:
+
+```bash
+VITE_API_BASE_URL=http://100.99.240.60:8787
+```
+
+## Commands
+
+- `npm run dev`: run the React Router SPA dev server on port `5173`.
+- `npm run typecheck`: generate React Router types and run TypeScript.
+- `npm test`: run frontend unit tests.
+- `npm run build`: build the static frontend into `build/client`.
+- `npm run preview`: preview the built frontend locally.
+- `npm run deploy`: deploy `build/client` to Cloudflare Pages.
+
+## Notes
+
+The frontend does not own API routes. API calls, SSE connections, Google OAuth start URLs, and device configuration QR codes all use `VITE_API_BASE_URL`.

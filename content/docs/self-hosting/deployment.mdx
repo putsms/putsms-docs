@@ -1,0 +1,57 @@
+---
+title: Production Deployment
+description: Deploy the Cloudflare backend, Dashboard, and optional Apple integrations.
+---
+
+<Steps>
+
+### Configure Cloudflare resources
+
+In `putsms-api/wrangler.jsonc`, set the Worker name, D1 database ID, migration directory, `USER_REALTIME` Durable Object, APNs Queue producer/consumer, and rate limiter for your account. Keep SQL files in `migrations/` as the schema source of truth.
+
+### Set variables and secrets
+
+Set production `FRONTEND_BASE_URL`, `ALLOWED_ORIGINS`, `GOOGLE_REDIRECT_URI`, `APNS_TOPIC`, and `APNS_ENV`. Add secrets outside source control:
+
+```bash
+pnpm exec wrangler secret put SMS_ENCRYPTION_KEY
+pnpm exec wrangler secret put SESSION_SECRET
+pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm exec wrangler secret put APNS_KEY_ID
+pnpm exec wrangler secret put APNS_TEAM_ID
+pnpm exec wrangler secret put APNS_PRIVATE_KEY
+```
+
+The first two are required. Google and APNs secrets are optional only when those integrations remain disabled.
+
+### Migrate and deploy the API
+
+```bash
+cd putsms-api
+pnpm typecheck
+pnpm test -- --run
+pnpm db:migrate:remote
+pnpm deploy:worker-only
+```
+
+Apply migrations before Worker code that depends on them. Confirm the resolved D1, Queue, and Durable Object bindings before sending traffic.
+
+### Deploy Dashboard
+
+Build with `VITE_API_BASE_URL=https://api.example.com`, then deploy `build/client` to Pages or another static host. Add its exact HTTPS origin to `ALLOWED_ORIGINS`; do not include paths or a trailing wildcard.
+
+### Configure OAuth and APNs
+
+Register the exact Worker callback URL with Google and keep its frontend return origin consistent. For APNs, configure topic, sandbox/production environment, key ID, team ID, and private key, then confirm the Queue consumer runs.
+
+### Build iOS
+
+Provide `DEVELOPMENT_TEAM`, `REVENUECAT_API_KEY`, and production `API_BASE_URL` to Xcode Cloud or the archive environment. Release builds do not bypass RevenueCat entitlement checks.
+
+### Connect clients and validate
+
+Use only HTTPS origins in production. Create a fresh Device Key for every source, test upload, sync, SSE, APNs, search, key rotation, and an encrypted-message round trip.
+
+</Steps>
+
+<Callout type="warn" title="Do not deploy example identities">Replace repository database IDs, OAuth client IDs, hostnames, and queue names with resources owned by your account.</Callout>

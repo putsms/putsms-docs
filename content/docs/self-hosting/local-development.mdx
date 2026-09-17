@@ -1,0 +1,44 @@
+---
+title: Local Development
+description: Run the Worker, D1, Dashboard, and iOS client locally.
+---
+
+<Steps>
+
+### Start the API
+
+```bash
+cd putsms-api
+pnpm install
+pnpm db:migrate:local
+pnpm dev
+```
+
+The Worker listens on `http://localhost:8787`. `pnpm dev:migrated` combines migration and startup.
+
+### Start Dashboard
+
+```bash
+cd putsms-dash
+pnpm install
+VITE_API_BASE_URL=http://localhost:8787 pnpm dev
+```
+
+Open `http://localhost:5173`. The Vite server does not proxy API calls.
+
+### Connect iOS
+
+```bash
+cd putsms-app
+xcodegen generate --spec project.yml
+```
+
+The Simulator can use `http://localhost:8787`. A physical phone needs your Mac's reachable LAN address because its own `localhost` is the phone. Debug builds bypass the RevenueCat entitlement for local cloud-sync testing.
+
+### Verify
+
+Create an account and source device, submit a test message, confirm it in Dashboard, then verify iOS push/pull sync and SSE updates.
+
+</Steps>
+
+Plain HTTP is for local development only. Use HTTPS for any network you do not fully control.

@@ -1,0 +1,28 @@
+---
+title: PutSMS iOS App
+description: 提供本地短信存储、后台同步和 APNs 通知的 SwiftUI 客户端。
+---
+
+iOS 项目使用 XcodeGen 从 `project.yml` 生成工程，确保本地构建与 Xcode Cloud 使用同一份定义。
+
+## 项目结构
+
+- `project.yml`：Targets、Packages、构建设置和 Schemes 的唯一来源。
+- `PutSMS/`：App 源码、Entitlements、资源和 `Info.plist`。
+- `PutSMS/Tests/`：单元测试。
+- `PutSMS.xcodeproj/`：供 Xcode 与 Xcode Cloud 使用的生成工程。
+- `ci_scripts/`：Xcode Cloud 生命周期脚本。
+
+## 本地设置
+
+构建所需环境变量：
+
+- `DEVELOPMENT_TEAM`：Apple Developer Team ID。
+- `REVENUECAT_API_KEY`：注入构建设置的 RevenueCat API Key。
+- `API_BASE_URL`：PutSMS API 地址。
+
+```sh
+xcodegen generate --spec project.yml
+```
+
+Xcode Cloud 在 Checkout 后通过 `ci_scripts/ci_post_clone.sh` 执行同一步骤。其他构建脚本仅输出必要上下文，签名、上传和发布流程仍由 Xcode Cloud 配置管理。

@@ -1,0 +1,5 @@
+{
+  "title": "用户指南",
+  "description": "连接短信来源并日常使用 PutSMS",
+  "pages": ["dashboard", "ios", "android", "air780epm", "browser-extension", "encryption", "troubleshooting"]
+}

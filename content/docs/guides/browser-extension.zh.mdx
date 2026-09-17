@@ -1,0 +1,16 @@
+---
+title: 浏览器扩展
+description: 使用 Chrome 或 Edge 持续接收桌面通知。
+---
+
+安装构建后的 Chrome/Edge MV3 扩展，打开弹窗并配置：
+
+- **API Base：**你的 Worker HTTPS 地址。
+- **Device Key：**作为 Bearer 凭据使用的 PutSMS Device Key。
+- **声音：**收到新短信时是否播放内置提示音。
+
+扩展会维持一条离屏 SSE 连接，并以轮询消息状态作为备用机制。即使 Dashboard 已关闭，角标仍会显示未读数。
+
+如需解密通知摘要，请导入 PutSMS 私钥备份 JSON。密钥仅保存在 `browser.storage.local`，不会上传。弃用浏览器配置或共用电脑前，请使用**清除私钥**。
+
+<Callout title="浏览器权限">将扩展权限限制在你运营的 Worker 地址。浏览器配置遭到泄露时，应轮换对应 Device Key。</Callout>

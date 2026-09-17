@@ -1,0 +1,6 @@
+{
+  "title": "Air780EPM",
+  "description": "PutSMS LuatOS 短信转发客户端",
+  "root": true,
+  "pages": ["index"]
+}

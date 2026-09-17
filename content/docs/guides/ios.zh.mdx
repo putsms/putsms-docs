@@ -1,0 +1,26 @@
+---
+title: iOS App 与快捷指令
+description: 在本地采集短信并同步到 PutSMS。
+---
+
+<Steps>
+
+### 连接 App
+
+在 Dashboard 创建 iOS 设备，然后在 PutSMS 中扫描配置二维码；也可手动填写 API 地址和 Device Key。
+
+### 添加动作
+
+在快捷指令中，将 PutSMS App Intent 加入接收或提取短信的自动化。映射发送方、正文、接收时间，以及可用的 SIM 信息。
+
+### 验证本地采集
+
+运行一次快捷指令，确认短信出现在 App 本地列表。PutSMS 会先写入 GRDB，因此短暂断网不会丢弃消息。
+
+### 开启同步和通知
+
+允许后台活动和通知，再执行同步。App 会推送待上传变更，并增量拉取远端短信。
+
+</Steps>
+
+勾选**要求加密上传**之前，请按照[端到端加密](/zh/docs/guides/encryption)注册并备份阅读端密钥。

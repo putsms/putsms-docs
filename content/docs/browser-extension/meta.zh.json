@@ -1,0 +1,6 @@
+{
+  "title": "浏览器扩展",
+  "description": "PutSMS Chrome 与 Edge 扩展",
+  "root": true,
+  "pages": ["index"]
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Browser Extension",
+  "description": "The PutSMS Chrome and Edge extension",
+  "root": true,
+  "pages": ["index"]
+}

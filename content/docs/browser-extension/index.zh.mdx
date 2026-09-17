@@ -1,0 +1,24 @@
+---
+title: PutSMS 浏览器扩展
+description: 即使管理页面关闭，也可持续接收 PutSMS 通知。
+---
+
+该 Chrome/Edge MV3 扩展会维持一条到 `/api/v1/events` 的离屏 SSE 连接，并以 `/api/v1/messages/state` 轮询作为备用。它显示未读角标、桌面通知，并可播放新消息提示音。
+
+## 配置
+
+- `API Base`：Worker 地址，例如 `https://api.putsms.com`。
+- `Device Key`：通过 `Authorization: Bearer <deviceKey>` 使用的 PutSMS 凭据。
+- `Sound`：是否播放通知声音。
+
+## 本地私钥
+
+弹窗可以导入 PutSMS 私钥备份 JSON，用于在本地解密 RSA 封装的通知摘要。私钥仅存储在 `browser.storage.local`，不会上传。**Clear Private Keys** 会清除当前 API 与设备凭据对应的本地私钥。
+
+```bash
+pnpm install
+pnpm dev
+pnpm build
+```
+
+生产构建输出到 `.output/chrome-mv3`。

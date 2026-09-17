@@ -1,0 +1,59 @@
+---
+title: 系统架构
+description: PutSMS 的组件、数据流与安全边界。
+---
+
+PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组件可以部署到你自己的 Cloudflare 账号；客户端保管各自凭据，启用 E2EE 时也由客户端保管私钥。
+
+<Mermaid label="PutSMS 详细架构图，展示上传、同步、实时事件、推送和密钥分发" chart={`flowchart TB
+  subgraph Input[短信输入端]
+    SI[iOS 快捷指令 / App Intents]
+    SA[Android SmsForwarder]
+    SH[Air780EPM]
+  end
+  subgraph Edge[Cloudflare 账号]
+    AU[会话 / Device Key 鉴权]
+    WK[Worker API]
+    DB[(D1)]
+    DO[Durable Object / SSE]
+    QU[APNs Queue]
+  end
+  subgraph Readers[阅读客户端]
+    IA[iOS App + 本地 GRDB]
+    DA[Dashboard]
+    EX[浏览器扩展]
+  end
+  SI -->|上传与同步；可选 E2EE| AU
+  SA -->|HTTPS 明文 JSON| AU
+  SH -->|HTTPS 明文 JSON| AU
+  AU --> WK
+  WK -->|存储 / 查询| DB
+  WK -->|发布事件| DO
+  WK -->|加入通知队列| QU
+  DB -->|增量同步| IA
+  DO -->|SSE 实时更新| DA
+  DO -->|SSE 实时更新| EX
+  QU -->|APNs| IA
+  IA -. 公钥 .-> WK
+  DA -. 公钥 .-> WK
+  WK -. 封装后的消息密钥 .-> IA
+  WK -. 封装后的消息密钥 .-> DA
+  WK -. 封装后的消息密钥 .-> EX`}/>
+
+## 数据流
+
+- **上传：**来源设备使用 Device Key 鉴权。iOS 可上传 AES-256-GCM 密文；Android 和 Air780EPM 当前通过 HTTPS 上传明文 JSON。
+- **同步：**iOS App 推送本地 GRDB 中待上传记录，并增量拉取远端变更，不依赖 CloudKit。
+- **实时事件：**Worker 通过 Durable Object 和 SSE 发布账号事件，Dashboard 与浏览器扩展再向 API 刷新消息状态。
+- **推送通知：**Worker 将 APNs 任务放入队列，发送给符合条件的 iOS 设备。通知内容的隐私边界取决于部署时选择的加密模式。
+- **密钥分发：**阅读客户端注册公钥；每条消息密钥使用 RSA-OAEP-SHA256 为各阅读端封装，私钥无需离开客户端。
+
+## 信任边界
+
+<Callout type="warn" title="E2EE 并非所有来源默认具备">
+  iOS 的“要求加密上传”在没有可用接收端公钥时会关闭失败。Android SmsForwarder 和当前 Air780EPM 尚无应用层加密；HTTPS 保护传输，服务端加密保护落盘数据，但 Worker 仍可处理明文。
+</Callout>
+
+Device Key 用于来源设备鉴权，并可独立轮换；浏览器会话用于用户鉴权。`SMS_ENCRYPTION_KEY` 保护服务管理的数据，它不是 E2EE 的替代，因为服务端持有该密钥。
+
+部署请继续阅读[自部署 PutSMS](/zh/docs/self-hosting)，客户端密钥管理请阅读[端到端加密](/zh/docs/guides/encryption)。

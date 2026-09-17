@@ -1,0 +1,26 @@
+---
+title: iOS App and Shortcuts
+description: Capture messages locally and synchronize them with PutSMS.
+---
+
+<Steps>
+
+### Connect the app
+
+Create an iOS device in Dashboard and scan its configuration QR code in PutSMS, or enter the API origin and Device Key manually.
+
+### Add the action
+
+In Shortcuts, add the PutSMS App Intent to the automation that receives or extracts the SMS. Map sender, message content, receive time, and SIM information when available.
+
+### Test local capture
+
+Run the Shortcut once and confirm the message appears in the app's local list. PutSMS stores it in GRDB first, so a temporary network outage does not discard it.
+
+### Enable sync and notifications
+
+Allow background activity and notifications, then run a sync. The app pushes pending changes and incrementally pulls remote messages.
+
+</Steps>
+
+Before selecting **Require encrypted uploads**, register and back up reader keys as described in [End-to-end encryption](/docs/guides/encryption).

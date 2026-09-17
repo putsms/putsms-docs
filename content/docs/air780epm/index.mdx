@@ -1,0 +1,72 @@
+---
+title: PutSMS for Air780EPM
+description: Reliably receive SMS on Air780EPM and forward them to PutSMS.
+---
+
+This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed uploads remain on the device filesystem and resume after restart or network recovery.
+
+<Callout type="warn" title="Phase-one security boundary">The current implementation uses a device-specific Put URL and uploads plaintext JSON through HTTPS. Pending messages are also plaintext in `/putsms_queue.json`. Application-layer encryption is a future phase.</Callout>
+
+## Files
+
+- `main.lua`: application entry point.
+- `sms_app.lua`: SMS receiving and scheduled carrier query.
+- `sntp_app.lua`: network time synchronization.
+- `putsms_config.lua`: device Put URL configuration.
+- `putsms_queue.lua`: persistent upload queue.
+- `putsms_client.lua`: upload, response validation, and retry logic.
+
+## Requirements
+
+- Air780EPM and an internet-capable SIM.
+- Air780EPM LuatOS firmware V2018 or newer.
+- Luatools.
+- A PutSMS account.
+
+## Configuration
+
+Create an `embedded` device in Dashboard, copy its one-time Put URL, and assign it to `put_url` in `putsms_config.lua`:
+
+```lua
+return {
+    put_url = "https://api.putsms.com/put/<device-key>",
+    allow_insecure_http = false,
+    client_version = VERSION or "001.999.003",
+    request_timeout_ms = 15000,
+    queue_max_items = 500,
+    queue_max_bytes = 512 * 1024,
+}
+```
+
+Production must use HTTPS. Enable `allow_insecure_http` only while testing a local Worker on a trusted network.
+
+## Flash and verify
+
+Flash all Lua files and the target firmware with Luatools. Wait for cellular and SNTP readiness, then send a test SMS. Confirm the sender, body, and receive time in PutSMS, and verify `/putsms_queue.json` eventually empties.
+
+成功日志不包含短信正文或 Put URL：
+
+```text
+I/sms.received sender 10001 bytes 48
+I/putsms.queue.enqueued id 7f31a9c2 items 1
+I/putsms.upload.request id 7f31a9c2 sender 10001 received_at 2026-09-16T19:00:00Z body_bytes 241
+I/putsms.upload.response id 7f31a9c2 status 200 accepted true body {"ok":true,"messageId":"air780epm-..."}
+I/putsms.upload.success id 7f31a9c2 status 200 message_id air780epm-... remaining 0
+```
+
+## Troubleshooting
+
+- `putsms.config.invalid`: empty or invalid Put URL, or an unsafe protocol.
+- `putsms.upload.auth_failed`: Device Key is invalid, revoked, or rotated.
+- `putsms.upload.retry`: network, timeout, rate limit, or temporary server failure; retries use backoff.
+- `putsms.upload.rejected`: invalid fields or conflicting duplicate ID; the task is paused.
+- `putsms.queue.full`: queue reached 500 items or 512 KiB.
+- `putsms.queue.corrupt`: neither primary nor backup queue can be parsed; preserve files for investigation.
+
+## Persistence and privacy
+
+The queue uses temporary files, backups, and rename operations. It removes a task only after the service confirms `ok=true` with a `messageId`. Logs omit complete message bodies and Put URLs. Never commit real configuration, queue files, or device logs.
+
+## Carrier query SMS
+
+The sample behavior sends `102` to China Telecom `10001` every ten minutes after startup. Carrier replies are uploaded as regular received messages; remove or change this behavior when it is not appropriate for your SIM.

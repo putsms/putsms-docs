@@ -1,0 +1,26 @@
+---
+title: Android SmsForwarder
+description: Forward Android SMS to a PutSMS device URL.
+---
+
+Create an Android device in Dashboard and copy its one-time Put URL:
+
+```text
+https://<worker-domain>/put/<deviceKey>
+```
+
+Configure SmsForwarder to POST JSON or form fields. `sender` and `content` are required; `receiver`, `receivedAt`, `simSlot`, and `clientVersion` are optional.
+
+```json
+{
+  "sender": "[from]",
+  "receiver": "[receiver number]",
+  "content": "[msg]",
+  "receivedAt": "[receive_time]",
+  "simSlot": "[card_slot]"
+}
+```
+
+Send a test SMS and verify it in Dashboard. A `401` response usually means the key was copied incorrectly, revoked, or rotated.
+
+<Callout type="warn" title="Transport encryption only">This integration currently sends plaintext JSON over HTTPS. It does not produce PutSMS E2EE ciphertext. Use HTTPS and protect the Put URL as a password.</Callout>

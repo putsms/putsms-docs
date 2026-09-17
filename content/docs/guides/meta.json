@@ -1,0 +1,5 @@
+{
+  "title": "User Guides",
+  "description": "Connect sources and use PutSMS every day",
+  "pages": ["dashboard", "ios", "android", "air780epm", "browser-extension", "encryption", "troubleshooting"]
+}

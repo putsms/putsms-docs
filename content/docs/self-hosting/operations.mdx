@@ -1,0 +1,30 @@
+---
+title: Operations and Upgrades
+description: Upgrade, observe, recover, and verify a self-hosted PutSMS service.
+---
+
+## Upgrade order
+
+1. Read migration and client compatibility notes.
+2. Back up or export the D1 database and preserve client private-key backups separately.
+3. Run API type checks and tests.
+4. Apply pending D1 migrations before dependent Worker code.
+5. Deploy the Worker, then Dashboard and clients.
+6. Run the verification checklist below.
+
+## Observe
+
+Enable Worker observability and source maps. Watch request errors and latency, D1 failures/read usage, Durable Object/SSE disconnects, Queue retries and dead letters, APNs rejection reasons, and rate-limit responses. Never log message bodies, Device Keys, Put URLs, session cookies, or private keys.
+
+## Verification checklist
+
+- Registration and sign-in work; OAuth callback returns to the correct frontend.
+- A new Device Key can upload, and a rotated/revoked key cannot.
+- Dashboard list, search, contacts, read state, and delete operations work.
+- iOS incremental push/pull converges after offline use.
+- SSE updates arrive and polling recovers after disconnect.
+- APNs Queue drains and a test device receives notification.
+- E2EE ciphertext decrypts only on clients holding a matching private key.
+- CORS rejects an unlisted origin and production clients use HTTPS.
+
+When rollback is necessary, do not assume a D1 migration is reversible. Prefer deploying compatible Worker code while preserving already-applied schema, then repair forward.

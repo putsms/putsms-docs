@@ -1,0 +1,44 @@
+---
+title: 本地开发
+description: 在本地运行 Worker、D1、Dashboard 和 iOS 客户端。
+---
+
+<Steps>
+
+### 启动 API
+
+```bash
+cd putsms-api
+pnpm install
+pnpm db:migrate:local
+pnpm dev
+```
+
+Worker 默认监听 `http://localhost:8787`。`pnpm dev:migrated` 可合并迁移与启动。
+
+### 启动 Dashboard
+
+```bash
+cd putsms-dash
+pnpm install
+VITE_API_BASE_URL=http://localhost:8787 pnpm dev
+```
+
+打开 `http://localhost:5173`。Vite 开发服务器不会代理 API 请求。
+
+### 连接 iOS
+
+```bash
+cd putsms-app
+xcodegen generate --spec project.yml
+```
+
+模拟器可使用 `http://localhost:8787`。真机中的 `localhost` 指向手机自身，因此应使用 Mac 在局域网中可访问的地址。Debug 构建会绕过 RevenueCat 权益，便于测试本地云同步。
+
+### 验证
+
+创建账号和来源设备，提交测试短信并在 Dashboard 确认，再验证 iOS 推拉同步与 SSE 更新。
+
+</Steps>
+
+明文 HTTP 仅用于本地开发；任何非完全可信网络都必须使用 HTTPS。

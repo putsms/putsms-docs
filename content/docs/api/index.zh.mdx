@@ -1,0 +1,38 @@
+---
+title: PutSMS API
+description: Cloudflare Worker 后端、D1 数据和设备同步 API。
+---
+
+该项目包含 Cloudflare Worker、D1 迁移、Durable Object、Queue 绑定和后端环境。
+
+## 本地开发
+
+```sh
+pnpm install
+pnpm db:migrate:local
+pnpm dev
+```
+
+也可使用 `pnpm dev:migrated` 自动迁移后启动。Worker 默认运行于 `http://localhost:8787`；Dashboard 使用 `VITE_API_BASE_URL=http://localhost:8787 pnpm dev` 连接。
+
+## 环境
+
+- `DB`：D1 数据库。
+- `USER_REALTIME`：SSE 实时事件 Durable Object。
+- `APNS_QUEUE`：APNs Queue。
+- `SMS_ENCRYPTION_KEY`、`SESSION_SECRET`：必需 Secrets。
+- `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`、`GOOGLE_REDIRECT_URI`：Google OAuth。
+- `FRONTEND_BASE_URL`、`ALLOWED_ORIGINS`：前端跳转与 CORS。
+- `APNS_TOPIC`、`APNS_ENV`、`APNS_KEY_ID`、`APNS_TEAM_ID`、`APNS_PRIVATE_KEY`：APNs。
+
+敏感值使用 `wrangler secret put` 设置，不要写入 `wrangler.jsonc`。
+
+## 常用命令
+
+- `pnpm dev`：在 `8787` 端口运行 Worker。
+- `pnpm typecheck`：生成 Wrangler 类型并运行 TypeScript 检查。
+- `pnpm test`：运行后端测试。
+- `pnpm db:migrate:local` / `pnpm db:migrate:remote`：应用本地/远端迁移。
+- `pnpm deploy`：迁移并部署；`pnpm deploy:worker-only` 只部署 Worker。
+
+设备可使用 `Authorization: Bearer <deviceKey>` 调用 `POST /api/v1/messages`。无法设置 Header 的硬件可调用 `POST /put/:deviceKey`；两者均接受 JSON 或表单格式的 `sender` 与 `content`。

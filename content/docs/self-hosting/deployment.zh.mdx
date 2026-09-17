@@ -1,0 +1,57 @@
+---
+title: 生产部署
+description: 部署 Cloudflare 后端、Dashboard 和可选的 Apple 集成。
+---
+
+<Steps>
+
+### 配置 Cloudflare 资源
+
+在 `putsms-api/wrangler.jsonc` 中设置你账号下的 Worker 名称、D1 数据库 ID、迁移目录、`USER_REALTIME` Durable Object、APNs Queue 生产者/消费者和限流器。`migrations/` 中的 SQL 文件是数据库结构的唯一来源。
+
+### 设置变量和 Secrets
+
+设置生产环境的 `FRONTEND_BASE_URL`、`ALLOWED_ORIGINS`、`GOOGLE_REDIRECT_URI`、`APNS_TOPIC` 和 `APNS_ENV`。在版本库之外写入 Secrets：
+
+```bash
+pnpm exec wrangler secret put SMS_ENCRYPTION_KEY
+pnpm exec wrangler secret put SESSION_SECRET
+pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm exec wrangler secret put APNS_KEY_ID
+pnpm exec wrangler secret put APNS_TEAM_ID
+pnpm exec wrangler secret put APNS_PRIVATE_KEY
+```
+
+前两个为必需项；只有不启用 Google 与 APNs 集成时，其余项才可缺省。
+
+### 迁移并部署 API
+
+```bash
+cd putsms-api
+pnpm typecheck
+pnpm test -- --run
+pnpm db:migrate:remote
+pnpm deploy:worker-only
+```
+
+依赖新结构的 Worker 上线前必须先应用迁移。切流量前确认 D1、Queue 和 Durable Object 绑定指向预期资源。
+
+### 部署 Dashboard
+
+使用 `VITE_API_BASE_URL=https://api.example.com` 构建，将 `build/client` 部署到 Pages 或其他静态托管。把 Dashboard 的准确 HTTPS Origin 加入 `ALLOWED_ORIGINS`，不要带路径或通配符。
+
+### 配置 OAuth 和 APNs
+
+在 Google 注册准确的 Worker 回调地址，并确保前端返回地址一致。APNs 需配置 Topic、sandbox/production 环境、Key ID、Team ID 和私钥，并确认 Queue 消费者正常运行。
+
+### 构建 iOS
+
+向 Xcode Cloud 或 Archive 环境提供 `DEVELOPMENT_TEAM`、`REVENUECAT_API_KEY` 和生产 `API_BASE_URL`。Release 构建不会绕过 RevenueCat 权益检查。
+
+### 连接客户端并验证
+
+生产环境只使用 HTTPS。为每个来源创建独立 Device Key，测试上传、同步、SSE、APNs、搜索、密钥轮换以及加密短信完整链路。
+
+</Steps>
+
+<Callout type="warn" title="不要沿用示例资源标识">请将仓库中的数据库 ID、OAuth Client ID、域名和队列名替换成你自己账号拥有的资源。</Callout>

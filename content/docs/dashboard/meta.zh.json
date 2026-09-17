@@ -1,0 +1,6 @@
+{
+  "title": "Dashboard",
+  "description": "PutSMS Web 管理控制台",
+  "root": true,
+  "pages": ["index"]
+}

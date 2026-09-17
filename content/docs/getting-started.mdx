@@ -1,0 +1,46 @@
+---
+title: Getting Started
+description: Create an account, connect a device, and receive your first message.
+---
+
+This guide uses the hosted Dashboard. Self-hosted users should [deploy the stack](/docs/self-hosting/deployment) first and substitute their own Dashboard and API origins.
+
+<Steps>
+
+### Create an account
+
+Open the Dashboard and register with email and password or the configured Google sign-in. Sign in before creating devices.
+
+### Add a device
+
+Open **Devices**, choose **Add device**, enter a recognizable name, and select the platform. PutSMS creates a Device Key and configuration QR code.
+
+<Callout type="warn" title="Save the credentials now">
+  The Device Key is shown during configuration. Treat it like a password: do not place it in source control, screenshots, chat, or logs. Rotate it from the Dashboard if it is exposed.
+</Callout>
+
+### Configure a message source
+
+Choose the matching guide:
+
+- [iOS App and Shortcuts](/docs/guides/ios)
+- [Android SmsForwarder](/docs/guides/android)
+- [Air780EPM](/docs/guides/air780epm)
+
+The iOS app can scan the QR configuration. Webhook-based clients use the generated Put URL.
+
+### Confirm the connection
+
+Return to **Devices** and check configuration status. A configured client confirms the binding with the API. If it remains pending, verify the API base URL and Device Key.
+
+### Send a test message
+
+Trigger the configured Shortcut, forward an Android SMS, or send an SMS to the Air780EPM SIM. Open **Messages** in the Dashboard and confirm sender, content, receive time, and source device.
+
+### Add reading clients
+
+Configure the [browser extension](/docs/guides/browser-extension) for persistent notifications, or bind another iOS device for synchronized access.
+
+</Steps>
+
+For sensitive messages, continue with [End-to-end encryption](/docs/guides/encryption) before enabling required encrypted uploads.

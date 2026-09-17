@@ -1,0 +1,32 @@
+---
+title: Air780EPM
+description: Configure reliable SMS forwarding on LuatOS hardware.
+---
+
+<Steps>
+
+### Prepare the device
+
+Use an Air780EPM with LuatOS V2018 or newer, an internet-capable SIM, and Luatools. Create an `embedded` device in Dashboard.
+
+### Configure the Put URL
+
+Set `put_url` in `putsms_config.lua` to the generated HTTPS URL. Keep `allow_insecure_http = false` outside a trusted local test network.
+
+```lua
+return {
+  put_url = "https://api.example.com/put/<device-key>",
+  allow_insecure_http = false,
+  request_timeout_ms = 15000,
+  queue_max_items = 500,
+  queue_max_bytes = 512 * 1024,
+}
+```
+
+### Flash and verify
+
+Flash the Lua files and firmware, wait for cellular and SNTP readiness, then send a test SMS. Confirm the message in PutSMS and that `/putsms_queue.json` eventually empties.
+
+</Steps>
+
+Failed uploads remain in a persistent queue and retry after restart or network recovery. The current implementation stores queued messages as plaintext on the hardware and uploads plaintext JSON through HTTPS; restrict physical access. See the [project reference](/docs/air780epm) for logs and failure codes.

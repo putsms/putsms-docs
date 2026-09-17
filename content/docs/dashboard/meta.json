@@ -1,0 +1,6 @@
+{
+  "title": "Dashboard",
+  "description": "The PutSMS web administration console",
+  "root": true,
+  "pages": ["index"]
+}

@@ -1,0 +1,30 @@
+---
+title: PutSMS iOS App
+description: The SwiftUI client for local SMS storage, background sync, and APNs notifications.
+---
+
+This directory contains the PutSMS iOS app project. The Xcode project is generated from `project.yml` with XcodeGen so local builds and Xcode Cloud builds use the same project definition.
+
+## Project Structure
+
+- `project.yml`: XcodeGen source of truth for targets, packages, build settings, and schemes.
+- `PutSMS/`: iOS app source files, entitlements, resources, and `Info.plist`.
+- `PutSMS/Tests/`: unit tests for the app target.
+- `PutSMS.xcodeproj/`: generated Xcode project used by Xcode and Xcode Cloud.
+- `ci_scripts/`: Xcode Cloud lifecycle scripts.
+
+## Local Setup
+
+Required environment variables:
+
+- `DEVELOPMENT_TEAM`: Apple Developer Team ID used for signing.
+- `REVENUECAT_API_KEY`: RevenueCat API key exposed to the app build settings.
+- `API_BASE_URL`: PutSMS API base URL used by the app build settings.
+
+Generate the Xcode project locally from this directory:
+
+```sh
+xcodegen generate --spec project.yml
+```
+
+The same generation step runs in Xcode Cloud through `ci_scripts/ci_post_clone.sh` after checkout. The pre-build and post-build scripts only print useful Xcode Cloud context for debugging and leave signing, uploading, and release workflow configuration to Xcode Cloud.

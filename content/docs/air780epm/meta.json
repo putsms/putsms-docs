@@ -1,0 +1,6 @@
+{
+  "title": "Air780EPM",
+  "description": "The PutSMS LuatOS forwarding client",
+  "root": true,
+  "pages": ["index"]
+}

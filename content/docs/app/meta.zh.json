@@ -1,0 +1,6 @@
+{
+  "title": "iOS App",
+  "description": "PutSMS SwiftUI 客户端",
+  "root": true,
+  "pages": ["index"]
+}

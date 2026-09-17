@@ -1,0 +1,16 @@
+---
+title: Browser Extension
+description: Receive persistent desktop notifications from Chrome or Edge.
+---
+
+Install the built Chrome/Edge MV3 extension, open its popup, and configure:
+
+- **API Base:** your Worker HTTPS origin.
+- **Device Key:** a PutSMS Device Key used as a Bearer credential.
+- **Sound:** whether new-message notifications play the bundled sound.
+
+The extension maintains one offscreen SSE connection and polls message state as a fallback. The badge shows unread count even when Dashboard is closed.
+
+For encrypted summaries, import a PutSMS private-key backup JSON file. Keys stay in `browser.storage.local` and are never uploaded. Use **Clear Private Keys** before disposing of a browser profile or shared computer.
+
+<Callout title="Browser permissions">Keep extension permissions limited to the Worker origin you operate. Rotate its Device Key if the browser profile is compromised.</Callout>

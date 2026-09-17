@@ -2,6 +2,27 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+
+:root {
+  --color-fd-background: oklch(1 0 0);
+  --color-fd-foreground: oklch(0.147 0.004 49.25);
+  --color-fd-primary: oklch(0.488 0.243 264.376);
+  --color-fd-primary-foreground: oklch(0.97 0.014 254.604);
+  --color-fd-border: oklch(0.88 0.018 264);
+  --color-fd-ring: oklch(0.546 0.245 262.881);
+  --color-fd-accent: oklch(0.96 0.025 264);
+  --color-fd-accent-foreground: oklch(0.28 0.12 264);
+  --color-fd-muted: oklch(0.97 0.008 264);
+  --color-fd-muted-foreground: oklch(0.45 0.025 264);
+
+}
+
+.dark {
+  --color-fd-primary: hsl(0, 0%, 98%);
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-ring: hsl(0, 0%, 63%);
+}
+
 html {
   scrollbar-gutter: stable;
 }

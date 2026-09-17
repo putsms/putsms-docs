@@ -1,0 +1,32 @@
+---
+title: End-to-end Encryption
+description: Generate, back up, restore, and rotate PutSMS client keys.
+---
+
+PutSMS E2EE encrypts each message with AES-256-GCM and wraps that message key for authorized readers with RSA-OAEP-SHA256. Dashboard, iOS, and the browser extension decrypt with locally stored private keys.
+
+<Steps>
+
+### Generate a reader key
+
+Create a key in a trusted Dashboard or iOS client and register only its public key with the API.
+
+### Back up the private key
+
+Export the recovery/private-key JSON and store it in an encrypted password manager or offline vault. The service cannot reconstruct a lost private key.
+
+### Import on other readers
+
+Import the backup into each trusted Dashboard profile, iOS device, or browser extension that must read encrypted messages.
+
+### Require encrypted uploads
+
+After confirming every intended reader has a usable key, enable **Require encrypted uploads** on iOS. Upload then fails closed when no usable public key is available.
+
+### Rotate deliberately
+
+Add the replacement key and verify decryption before retiring the old key. Retaining an old private-key backup may be required to read historical ciphertext.
+
+</Steps>
+
+<Callout type="warn" title="Know what is not E2EE">Android SmsForwarder and Air780EPM currently send plaintext JSON over HTTPS. Server-side encryption is useful at rest, but it does not hide content from the Worker.</Callout>

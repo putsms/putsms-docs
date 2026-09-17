@@ -1,0 +1,41 @@
+---
+title: PutSMS Browser Extension
+description: The Chrome and Edge extension for persistent PutSMS notifications.
+---
+
+Chrome/Edge MV3 extension for keeping PutSMS message notifications active when the Admin page is closed.
+
+## Features
+
+- Connects to the PutSMS Worker with API base + device token.
+- Keeps a single offscreen SSE connection to `/api/v1/events`.
+- Polls `/api/v1/messages/state` as a fallback and for message details.
+- Shows badge unread counts and desktop notifications.
+- Plays the bundled new-message sound when enabled.
+- Decrypts encrypted notification summaries locally when an E2EE recovery key or matching RSA private key is stored.
+
+## Configuration
+
+Open the extension popup and configure:
+
+- `API Base`: Worker origin, for example `https://api.putsms.com` or `http://localhost:8787`.
+- `Device Key`: PutSMS Device Key. Requests use `Authorization: Bearer <deviceKey>`.
+- `Sound`: enable or disable notification sound.
+
+## Local Private Keys
+
+The popup supports importing a PutSMS private key backup JSON file. Imported private keys are stored only in `browser.storage.local` and are used locally to decrypt RSA-wrapped encrypted message summaries.
+
+Private keys are never uploaded to the Worker or any remote endpoint.
+
+Use `Clear Private Keys` to remove imported private keys for the current API base and device token.
+
+## Commands
+
+```bash
+pnpm install
+pnpm dev
+pnpm build
+```
+
+The production build is emitted to `.output/chrome-mv3`.

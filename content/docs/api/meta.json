@@ -1,0 +1,6 @@
+{
+  "title": "API",
+  "description": "The PutSMS Cloudflare Worker backend",
+  "root": true,
+  "pages": ["index"]
+}

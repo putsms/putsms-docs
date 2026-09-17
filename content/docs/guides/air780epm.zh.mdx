@@ -1,0 +1,32 @@
+---
+title: Air780EPM
+description: 在 LuatOS 硬件上配置可靠的短信转发。
+---
+
+<Steps>
+
+### 准备设备
+
+使用 Air780EPM、V2018 或更高版本 LuatOS 固件、可联网 SIM 卡和 Luatools。在 Dashboard 创建 `embedded` 设备。
+
+### 配置 Put URL
+
+将生成的 HTTPS 地址写入 `putsms_config.lua` 的 `put_url`。除可信本地测试网络外，应保持 `allow_insecure_http = false`。
+
+```lua
+return {
+  put_url = "https://api.example.com/put/<device-key>",
+  allow_insecure_http = false,
+  request_timeout_ms = 15000,
+  queue_max_items = 500,
+  queue_max_bytes = 512 * 1024,
+}
+```
+
+### 烧录并验证
+
+烧录 Lua 文件和固件，等待蜂窝网络与 SNTP 就绪，再发送测试短信。在 PutSMS 中确认短信，并确认 `/putsms_queue.json` 最终清空。
+
+</Steps>
+
+上传失败的短信会留在持久化队列，并在重启或网络恢复后重试。当前实现会在硬件上明文保存队列，并通过 HTTPS 上传明文 JSON，请限制设备物理访问。日志和错误码参见[项目参考](/zh/docs/air780epm)。
