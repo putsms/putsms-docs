@@ -17,7 +17,7 @@ Export the recovery/private-key JSON and store it in an encrypted password manag
 
 ### Import on other readers
 
-Import the backup into each trusted Dashboard profile, iOS device, or browser extension that must read encrypted messages.
+Import the backup into each trusted Dashboard profile, iOS device, or browser extension that must read encrypted messages. On iOS, select the visible source device before choosing its backup. PutSMS validates that the backup matches that device, keeps multiple private keys in the shared Keychain, and makes them available to the notification service extension. A failed server binding remains marked pending and is retried later.
 
 ### Require encrypted uploads
 
@@ -29,4 +29,4 @@ Add the replacement key and verify decryption before retiring the old key. Retai
 
 </Steps>
 
-<Callout type="warn" title="Know what is not E2EE">Android SmsForwarder and Air780EPM currently send plaintext JSON over HTTPS. Server-side encryption is useful at rest, but it does not hide content from the Worker.</Callout>
+<Callout type="warn" title="Know what is not E2EE">Android SmsForwarder and Air780EPM currently send plaintext JSON over HTTPS. Air780EPM can probe firmware TRNG/AES-GCM capabilities, but it does not support RSA-OAEP or PutSMS E2EE; its pure-Lua RSA experiment was reverted. Server-side encryption is useful at rest, but it does not hide content from the Worker.</Callout>

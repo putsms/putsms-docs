@@ -53,3 +53,9 @@ VITE_API_BASE_URL=http://100.99.240.60:8787
 ## Notes
 
 The frontend does not own API routes. API calls, SSE connections, Google OAuth start URLs, and device configuration QR codes all use `VITE_API_BASE_URL`.
+
+## Embedded Enrollment
+
+Embedded devices use SMS enrollment instead of exposing a Device Key in the creation dialog. Dashboard generates a single-use registration code, shows the `PUTSMS REG` command and its countdown, supports an optional custom HTTPS API origin, and checks connection state after the modem redeems the code.
+
+A connected embedded device can be unbound from its registration status menu. Unbinding immediately revokes the current token and returns the record to pending so a new account or configuration can enroll it. Embedded devices cannot be converted to or from another platform, and their credentials do not use the regular rotation UI.

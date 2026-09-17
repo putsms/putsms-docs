@@ -9,14 +9,34 @@ description: 在 LuatOS 硬件上配置可靠的短信转发。
 
 使用 Air780EPM、V2018 或更高版本 LuatOS 固件、可联网 SIM 卡和 Luatools。在 Dashboard 创建 `embedded` 设备。
 
-### 配置 Put URL
+### 生成短信注册码
 
-将生成的 HTTPS 地址写入 `putsms_config.lua` 的 `put_url`。除可信本地测试网络外，应保持 `allow_insecure_http = false`。
+打开 embedded 设备的连接设置，选择**生成短信注册码**。`XXXX-XXXX` 格式的注册码十分钟后过期，且只能使用一次。
+
+### 发送注册短信
+
+向 Air780EPM 中的 SIM 卡发送：
+
+```text
+PUTSMS REG XXXX-XXXX
+```
+
+连接自部署 API 时，在命令末尾追加 HTTPS 地址：
+
+```text
+PUTSMS REG XXXX-XXXX https://sms.example.com
+```
+
+设备兑换注册码后，将生成的凭据原子写入 `/putsms_device.json`，确认配置并发送结果回执；确认成功后才开始上传。已有手工配置设备可继续保留 `put_url`，新设备应将其留空。
 
 ```lua
 return {
-  put_url = "https://api.example.com/put/<device-key>",
+  put_url = "",
   allow_insecure_http = false,
+  sms_encoding_debug = false,
+  crypto_capability_probe = true,
+  default_api_base_url = "https://api.putsms.com",
+  client_version = VERSION or "001.999.006",
   request_timeout_ms = 15000,
   queue_max_items = 500,
   queue_max_bytes = 512 * 1024,
@@ -25,8 +45,8 @@ return {
 
 ### 烧录并验证
 
-烧录 Lua 文件和固件，等待蜂窝网络与 SNTP 就绪，再发送测试短信。在 PutSMS 中确认短信，并确认 `/putsms_queue.json` 最终清空。
+烧录 Lua 文件和固件，等待蜂窝网络与 SNTP 就绪，完成注册后再发送测试短信。在 Dashboard 确认连接状态，在 PutSMS 中确认短信，并确认 `/putsms_queue.json` 最终清空。
 
 </Steps>
 
-上传失败的短信会留在持久化队列，并在重启或网络恢复后重试。当前实现会在硬件上明文保存队列，并通过 HTTPS 上传明文 JSON，请限制设备物理访问。日志和错误码参见[项目参考](/zh/docs/air780epm)。
+上传失败的短信会留在持久化队列，并在重启或网络恢复后重试；注册命令也会入队，并在注册完成后以完整原文上传。当前实现会在硬件上明文保存短信和注册命令，并通过 HTTPS 上传明文 JSON，请限制设备物理访问。需要更换账号时，在 Dashboard **解绑设备**，生成新注册码并重新发送注册短信。日志和错误码参见[项目参考](/zh/docs/air780epm)。

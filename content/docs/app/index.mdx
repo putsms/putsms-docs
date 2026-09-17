@@ -28,3 +28,9 @@ xcodegen generate --spec project.yml
 ```
 
 The same generation step runs in Xcode Cloud through `ci_scripts/ci_post_clone.sh` after checkout. The pre-build and post-build scripts only print useful Xcode Cloud context for debugging and leave signing, uploading, and release workflow configuration to Xcode Cloud.
+
+## Private Keys and Notifications
+
+The app lists devices visible to the current Device Key and lets the user import a private-key backup for a specific source device. It verifies that the key ID and public key match the selected device before import. Multiple private keys can coexist in the shared Keychain access group, allowing the notification service extension to decrypt encrypted APNs payloads addressed to different keys.
+
+Imported key bindings are scoped to source devices the current device is allowed to see. If server binding fails, the key remains installed locally with a pending state and the app retries after configuration or startup. Deleting a local key does not remove the server public-key record and can make messages encrypted only for that key unreadable on this device.

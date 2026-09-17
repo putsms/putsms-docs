@@ -17,7 +17,7 @@ PutSMS E2EE 使用 AES-256-GCM 加密每条短信，再使用 RSA-OAEP-SHA256 �
 
 ### 导入其他阅读端
 
-将备份导入每个需要阅读加密短信的可信 Dashboard 配置、iOS 设备或浏览器扩展。
+将备份导入每个需要阅读加密短信的可信 Dashboard 配置、iOS 设备或浏览器扩展。在 iOS 中，应先选择可见的来源设备，再选取对应备份。PutSMS 会校验备份是否属于该设备，在共享 Keychain 中保存多把私钥，并提供给通知服务扩展使用。服务端绑定失败时会标记为等待绑定，之后自动重试。
 
 ### 要求加密上传
 
@@ -29,4 +29,4 @@ PutSMS E2EE 使用 AES-256-GCM 加密每条短信，再使用 RSA-OAEP-SHA256 �
 
 </Steps>
 
-<Callout type="warn" title="明确非 E2EE 来源">Android SmsForwarder 和 Air780EPM 当前通过 HTTPS 发送明文 JSON。服务端加密可保护静态数据，但不能向 Worker 隐藏内容。</Callout>
+<Callout type="warn" title="明确非 E2EE 来源">Android SmsForwarder 和 Air780EPM 当前通过 HTTPS 发送明文 JSON。Air780EPM 可以探测固件的 TRNG/AES-GCM 能力，但不支持 RSA-OAEP 或 PutSMS E2EE；其纯 Lua RSA 实验已回滚。服务端加密可保护静态数据，但不能向 Worker 隐藏内容。</Callout>

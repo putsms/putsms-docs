@@ -11,7 +11,7 @@ Register with email and password, or use Google sign-in when your deployment ena
 
 ### Create a device
 
-Open **Devices**, select **Add device**, choose its platform, and give it a recognizable name. Save the one-time Device Key or scan the configuration QR code immediately.
+Open **Devices**, select **Add device**, choose its platform, and give it a recognizable name. Save the one-time Device Key or scan the configuration QR code immediately for regular clients. Embedded devices use **Generate SMS code** instead: send the displayed command to the modem SIM before the ten-minute code expires.
 
 ### Work with messages
 
@@ -19,7 +19,7 @@ Use **Messages** to browse or search by sender and content. Mark messages read o
 
 ### Maintain access
 
-Review connected devices and public keys regularly. Rotate a Device Key after accidental disclosure; update the source before revoking the old credential.
+Review connected devices and public keys regularly. Rotate a regular Device Key after accidental disclosure; update the source before revoking the old credential. Embedded credentials cannot be rotated from the regular flow. Use **Unbind device**, then generate and send a new SMS enrollment command; the old token stops working immediately.
 
 </Steps>
 

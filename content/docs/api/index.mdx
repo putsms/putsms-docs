@@ -78,3 +78,29 @@ Authorization: Bearer <deviceKey>
 ```
 
 Hardware that cannot set request headers can use `POST /put/:deviceKey`. Both endpoints accept JSON or form-encoded `sender` and `content` fields and share the same validation and storage path.
+
+## Embedded Device Enrollment
+
+Embedded devices do not receive credentials from the normal device-creation response. Dashboard creates a single-use, ten-minute code with:
+
+```http
+POST /api/v1/devices/:deviceId/enrollment-code
+```
+
+The device redeems it without an existing session or Device Key:
+
+```http
+POST /api/v1/device-enrollments/redeem
+Content-Type: application/json
+
+{
+  "code": "XXXX-XXXX",
+  "platform": "embedded",
+  "clientVersion": "001.999.006",
+  "hardwareFingerprint": "sha256:<64-hex-characters>"
+}
+```
+
+Successful redemption returns the API origin, device ID, generated device token, and display ID. Generation and redemption are rate-limited; used codes return `409`, while invalid or expired codes return `400`. Embedded devices cannot switch platform or use regular credential rotation.
+
+To move an embedded device between accounts, the owner calls `POST /api/v1/devices/:deviceId/unenroll`. This clears its credential, pairing and sync state, invalidates unused enrollment codes, and makes the current token fail immediately. The modem must complete a new SMS enrollment afterward.

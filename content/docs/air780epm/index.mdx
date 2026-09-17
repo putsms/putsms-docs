@@ -3,16 +3,21 @@ title: PutSMS for Air780EPM
 description: Reliably receive SMS on Air780EPM and forward them to PutSMS.
 ---
 
-This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed uploads remain on the device filesystem and resume after restart or network recovery.
+This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed uploads remain on the device filesystem and resume after restart or network recovery. It supports existing manual Put URLs and one-time registration by SMS.
 
-<Callout type="warn" title="Phase-one security boundary">The current implementation uses a device-specific Put URL and uploads plaintext JSON through HTTPS. Pending messages are also plaintext in `/putsms_queue.json`. Application-layer encryption is a future phase.</Callout>
+<Callout type="warn" title="Current security boundary">Message uploads and enrollment credentials are application-layer plaintext protected by HTTPS. Pending messages and registration commands are plaintext in `/putsms_queue.json`. Air780EPM does not currently support RSA-OAEP or PutSMS E2EE; the pure-Lua RSA-2048 experiment was reverted because it blocked real hardware long enough to trigger module protection.</Callout>
 
 ## Files
 
 - `main.lua`: application entry point.
 - `sms_app.lua`: SMS receiving and scheduled carrier query.
+- `sms_text.lua`: UTF-8, CESU-8, and UTF-16BE/UCS-2 normalization.
+- `crypto_probe.lua`: safe startup probe for firmware TRNG and AES-GCM capabilities.
+- `putsms_device.lua`: atomic persistence and power-loss recovery for enrollment configuration.
+- `putsms_registration.lua`: registration parsing, credential redemption, confirmation, and reply SMS.
+- `sms_sender.lua`: serialized registration replies and carrier query messages.
 - `sntp_app.lua`: network time synchronization.
-- `putsms_config.lua`: device Put URL configuration.
+- `putsms_config.lua`: default API origin and legacy manual Put URL compatibility.
 - `putsms_queue.lua`: persistent upload queue.
 - `putsms_client.lua`: upload, response validation, and retry logic.
 
@@ -23,28 +28,38 @@ This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed
 - Luatools.
 - A PutSMS account.
 
-## Configuration
+## SMS enrollment
 
-Create an `embedded` device in Dashboard, copy its one-time Put URL, and assign it to `put_url` in `putsms_config.lua`:
+1. Create an `embedded` device in Dashboard.
+2. Open its connection settings and generate a one-time SMS code.
+3. Send `PUTSMS REG XXXX-XXXX` to the modem SIM.
+4. For a self-hosted API, send `PUTSMS REG XXXX-XXXX https://sms.example.com`.
+
+Codes expire after ten minutes and are single-use. The modem redeems the code for a generated Device Key, persists configuration in `/putsms_device.json`, confirms it with the API, and sends a result SMS. Uploads begin only after confirmation.
+
+Existing manually provisioned devices can retain a Put URL. New devices should leave it empty:
 
 ```lua
 return {
-    put_url = "https://api.putsms.com/put/<device-key>",
+    put_url = "",
     allow_insecure_http = false,
-    client_version = VERSION or "001.999.003",
+    sms_encoding_debug = false,
+    crypto_capability_probe = true,
+    default_api_base_url = "https://api.putsms.com",
+    client_version = VERSION or "001.999.006",
     request_timeout_ms = 15000,
     queue_max_items = 500,
     queue_max_bytes = 512 * 1024,
 }
 ```
 
-Production must use HTTPS. Enable `allow_insecure_http` only while testing a local Worker on a trusted network.
+Production must use HTTPS. Enable `allow_insecure_http` only while testing a local Worker on a trusted network. `crypto_capability_probe` performs a metadata-only in-memory check for TRNG and AES-GCM; it does not encrypt uploads and must not be treated as E2EE support.
 
 ## Flash and verify
 
-Flash all Lua files and the target firmware with Luatools. Wait for cellular and SNTP readiness, then send a test SMS. Confirm the sender, body, and receive time in PutSMS, and verify `/putsms_queue.json` eventually empties.
+Flash all Lua files and the target firmware with Luatools. Wait for cellular and SNTP readiness, complete SMS enrollment, then send a test SMS. Confirm the connection and message in PutSMS, and verify `/putsms_queue.json` eventually empties.
 
-成功日志不包含短信正文或 Put URL：
+Successful logs omit the message body and Put URL:
 
 ```text
 I/sms.received sender 10001 bytes 48
@@ -63,9 +78,13 @@ I/putsms.upload.success id 7f31a9c2 status 200 message_id air780epm-... remainin
 - `putsms.queue.full`: queue reached 500 items or 512 KiB.
 - `putsms.queue.corrupt`: neither primary nor backup queue can be parsed; preserve files for investigation.
 
+Use **Unbind device** in Dashboard before moving the modem to another account. Unbinding immediately invalidates its current token and returns the record to pending; generate and send a new registration command to reconnect it.
+
 ## Persistence and privacy
 
-The queue uses temporary files, backups, and rename operations. It removes a task only after the service confirms `ok=true` with a `messageId`. Logs omit complete message bodies and Put URLs. Never commit real configuration, queue files, or device logs.
+The queue uses temporary files, backups, and rename operations. It removes a task only after the service confirms `ok=true` with a `messageId`. Registration commands are queued like other messages and uploaded in full after enrollment. Logs omit complete message bodies and Put URLs. Never commit real configuration, queue files, or device logs.
+
+Incoming text is normalized to UTF-8 before enqueueing. Valid UTF-8 is preserved; CESU-8 surrogate pairs and explicit UTF-16BE/UCS-2 are converted, while unrecoverable bytes become Unicode replacement characters.
 
 ## Carrier query SMS
 

@@ -36,3 +36,29 @@ pnpm dev
 - `pnpm deploy`：迁移并部署；`pnpm deploy:worker-only` 只部署 Worker。
 
 设备可使用 `Authorization: Bearer <deviceKey>` 调用 `POST /api/v1/messages`。无法设置 Header 的硬件可调用 `POST /put/:deviceKey`；两者均接受 JSON 或表单格式的 `sender` 与 `content`。
+
+## Embedded 设备注册
+
+创建 Embedded 设备时，普通响应不会直接返回凭据。Dashboard 通过以下接口创建十分钟有效、仅可使用一次的注册码：
+
+```http
+POST /api/v1/devices/:deviceId/enrollment-code
+```
+
+设备无需已有 Session 或 Device Key 即可兑换：
+
+```http
+POST /api/v1/device-enrollments/redeem
+Content-Type: application/json
+
+{
+  "code": "XXXX-XXXX",
+  "platform": "embedded",
+  "clientVersion": "001.999.006",
+  "hardwareFingerprint": "sha256:<64 位十六进制字符>"
+}
+```
+
+兑换成功后返回 API 地址、设备 ID、生成的 Device Token 和显示 ID。生成与兑换都有限流；已使用注册码返回 `409`，无效或过期返回 `400`。Embedded 设备不能切换平台，也不能使用普通凭据轮换流程。
+
+将 Embedded 设备转移到其他账号时，所有者调用 `POST /api/v1/devices/:deviceId/unenroll`。接口会清除凭据、配对与同步状态，使未使用注册码失效，并立即撤销当前 Token；之后模组必须重新完成短信注册。

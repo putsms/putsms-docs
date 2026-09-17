@@ -12,6 +12,10 @@ description: Diagnose configuration, synchronization, notification, and encrypti
 | No iOS notification | Notification permission, APNs registration, queue consumer, APNs environment/topic |
 | Encrypted message is unreadable | Matching local private key and recovery backup for that message |
 | Required encrypted upload fails | At least one active compatible reader public key must be registered |
+| Air780EPM code fails | Code is unused, within its ten-minute lifetime, and the optional API origin is HTTPS |
+| Air780EPM remains pending | Cellular/SNTP readiness, enrollment reply, `/putsms_device.json`, and confirmation request |
+| Air780EPM old token returns `401` | The device was unbound; generate and send a new enrollment command |
+| Imported iOS key is pending | The selected backup matches a visible source device and the API is reachable |
 
 Rotate exposed Device Keys rather than retrying them. Do not post message bodies, Put URLs, private keys, or complete request headers in support logs.
 
