@@ -8,7 +8,10 @@ description: Diagnose configuration, synchronization, notification, and encrypti
 | Device stays pending | API origin reachability, QR/config values, and Device Key validity |
 | `401` or `403` | Key copied in full, not revoked, and belongs to the selected API origin |
 | Messages do not sync | Network, pending local records, system background permissions, and API logs |
-| Dashboard does not update live | SSE request to `/api/v1/events`, CORS origin, then polling fallback |
+| Dashboard or extension does not update live | SSE request to `/api/v1/events`, CORS origin, connection status, and reconnect state |
+| Browser extension has no desktop notification | **Test notification**, browser/OS notification permission, and Focus/Do Not Disturb |
+| Verification-code prompt does not appear | Prompt toggle, excluded host rules, a contextual 4-8 digit code, and local decryption for encrypted messages |
+| **Fill code** does not fill | Focus a supported text/tel/number input; cross-origin frames, segmented fields, and closed Shadow DOM are unsupported |
 | No iOS notification | Notification permission, APNs registration, queue consumer, APNs environment/topic |
 | Encrypted message is unreadable | Matching local private key and recovery backup for that message |
 | Required encrypted upload fails | At least one active compatible reader public key must be registered |

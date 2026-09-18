@@ -1,41 +1,70 @@
 ---
 title: PutSMS Browser Extension
-description: The Chrome and Edge extension for persistent PutSMS notifications.
+description: Persistent Chrome and Edge notifications with local decryption and verification-code fill.
 ---
 
-Chrome/Edge MV3 extension for keeping PutSMS message notifications active when the Admin page is closed.
-
-## Features
-
-- Connects to the PutSMS Worker with API base + device token.
-- Keeps a single offscreen SSE connection to `/api/v1/events`.
-- Polls `/api/v1/messages/state` as a fallback and for message details.
-- Shows badge unread counts and desktop notifications.
-- Plays the bundled new-message sound when enabled.
-- Decrypts encrypted notification summaries locally when an E2EE recovery key or matching RSA private key is stored.
+The Chrome/Edge Manifest V3 extension keeps PutSMS notifications available while the Dashboard is closed. It maintains one authenticated offscreen SSE connection to `/api/v1/events`, reconnects after network errors or a normal stream close, and fetches `/api/v1/messages/state` when message events arrive or a connection recovers. It does not poll on a timer.
 
 ## Configuration
 
-Open the extension popup and configure:
+Open the extension popup and either import a PutSMS device configuration JSON or enter:
 
-- `API Base`: Worker origin, for example `https://api.putsms.com` or `http://localhost:8787`.
-- `Device Key`: PutSMS Device Key. Requests use `Authorization: Bearer <deviceKey>`.
-- `Sound`: enable or disable notification sound.
+- `API Base`: the Worker origin, for example `https://api.putsms.com`.
+- `Device ID`: the configured PutSMS client device.
+- `Device Key`: the Bearer credential used to call the API.
+- `Sound`: whether a new-message notification plays the bundled sound.
 
-## Local Private Keys
+The popup reports the SSE state, last connection and event times, retry state, unread count, and browser notification permission. **Check now** performs a manual diagnostic request; it is not a polling fallback.
 
-The popup supports importing a PutSMS private key backup JSON file. Imported private keys are stored only in `browser.storage.local` and are used locally to decrypt RSA-wrapped encrypted message summaries.
+<Callout title="Allow browser notifications">If SSE is connected but no desktop alert appears, use **Test notification**, then check the browser's notification status, the operating-system notification permission for Chrome or Edge, and Focus/Do Not Disturb.</Callout>
 
-Private keys are never uploaded to the Worker or any remote endpoint.
+## Verification-code fill
 
-Use `Clear Private Keys` to remove imported private keys for the current API base and device token.
+**Show verification code prompts** is enabled by default. The extension recognizes contextual 4-8 digit codes near terms such as `验证码`, `OTP`, `code`, and `verification code` in plaintext or successfully decrypted messages.
 
-## Commands
+- A new code first appears in the upper-right corner of the active HTTP/HTTPS page.
+- Focusing an eligible text, telephone, or numeric input moves the prompt next to that field.
+- Leaving the input and prompt returns it to the upper-right corner.
+- **Fill code** writes the code and emits normal `input` and `change` events without submitting the form.
+- The copy button copies the code and closes the prompt.
+- The code follows the active tab and completed page navigations while it remains available.
+- The prompt displays `Auto-closes in Ns` and closes automatically after 60 seconds.
+- Filling, copying, dismissing, or automatic closing clears the prompt from every tab.
+
+Turning the feature off closes the current prompt and prevents future code prompts without disabling message notifications.
+
+### Excluded websites
+
+Enter one hostname per line under **Excluded websites**:
+
+```text
+example.com
+*.internal.example.com
+```
+
+An exact hostname matches only itself. A wildcard matches subdomains but not the root hostname. Do not include protocols, ports, or paths. Exclusions remain in extension-local storage and affect code prompts only.
+
+Browser internal pages, extension stores, PDF viewers, `file://` pages, cross-origin iframes, closed Shadow DOM, `contenteditable`, and segmented OTP fields are not supported. The extension never submits a form or clicks a page button.
+
+## Local private keys
+
+The popup imports PutSMS RSA private-key backup JSON files in format version 1 or 2. Before storage, the extension validates the metadata and imports the PKCS#8 RSA key through Web Crypto. Keys remain in `browser.storage.local` and are never uploaded or injected into page JavaScript.
+
+For an encrypted message, the extension selects a key matching `recipientKeyId` and decrypts the RSA-OAEP/AES-GCM summary locally. Successful decryption enables the notification preview and verification-code detector. The prompt uses the same green open-lock state as the Dashboard: **Encrypted and unlocked**. Missing or invalid keys result in a generic encrypted-message notification and no code prompt.
+
+Use **Clear Private Keys** before disposing of a browser profile or shared computer.
+
+## Install a local build
 
 ```bash
 pnpm install
-pnpm dev
+pnpm test
+pnpm typecheck
 pnpm build
 ```
 
-The production build is emitted to `.output/chrome-mv3`.
+Load `.output/chrome-mv3` from `chrome://extensions` or `edge://extensions` with Developer mode enabled. After every rebuild, click **Reload** on the extension card; reloading a normal browser tab does not update its service worker or content scripts.
+
+## Privacy and permissions
+
+The extension uses notification, offscreen, storage, tabs, clipboard-write, and HTTP/HTTPS host permissions. Only the code, message ID, automatic-close time, encryption state, and a display label are sent to the active page content script. The full SMS body, Device Key, and private keys are not exposed to the page.

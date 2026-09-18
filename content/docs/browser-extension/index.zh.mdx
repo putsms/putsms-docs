@@ -1,24 +1,70 @@
 ---
 title: PutSMS 浏览器扩展
-description: 即使管理页面关闭，也可持续接收 PutSMS 通知。
+description: 在 Chrome 与 Edge 中持续接收通知、本地解密并填入验证码。
 ---
 
-该 Chrome/Edge MV3 扩展会维持一条到 `/api/v1/events` 的离屏 SSE 连接，并以 `/api/v1/messages/state` 轮询作为备用。它显示未读角标、桌面通知，并可播放新消息提示音。
+Chrome/Edge Manifest V3 扩展可以在 Dashboard 关闭时持续接收 PutSMS 通知。扩展通过离屏文档维持一条经过认证的 `/api/v1/events` SSE 连接；网络异常或服务端正常结束流后会自动重连，并在消息事件到达或连接恢复时请求 `/api/v1/messages/state`。扩展不会定时轮询。
 
 ## 配置
 
+打开扩展弹窗，导入 PutSMS 设备配置 JSON，或手动填写：
+
 - `API Base`：Worker 地址，例如 `https://api.putsms.com`。
-- `Device Key`：通过 `Authorization: Bearer <deviceKey>` 使用的 PutSMS 凭据。
-- `Sound`：是否播放通知声音。
+- `Device ID`：当前 PutSMS 客户端设备。
+- `Device Key`：调用 API 时使用的 Bearer 凭据。
+- `Sound`：收到新消息通知时是否播放内置提示音。
+
+弹窗会显示 SSE 状态、最后连接和事件时间、重试状态、未读数及浏览器通知权限。**Check now** 只执行一次手动诊断请求，不是轮询备用机制。
+
+<Callout title="允许浏览器通知">如果 SSE 已连接但没有桌面通知，请先使用 **Test notification**，再检查扩展显示的通知状态、macOS/Windows 对 Chrome 或 Edge 的通知权限，以及专注模式/勿扰模式。</Callout>
+
+## 验证码填入
+
+**Show verification code prompts** 默认开启。扩展会从明文或本地成功解密的短信中识别带有 `验证码`、`OTP`、`code`、`verification code` 等上下文的 4–8 位数字。
+
+- 新验证码首先显示在当前 HTTP/HTTPS 页面右上角。
+- 聚焦合适的文本、电话或数字输入框后，提示会移动到输入框旁边。
+- 焦点离开输入框与提示卡片后，提示会回到右上角。
+- 点击 **Fill code** 会填入验证码并派发正常的 `input` 和 `change` 事件，但不会提交表单。
+- 点击复制按钮会复制验证码并关闭提示。
+- 验证码仍有效时，切换活动标签页或完成页面导航会在新页面重新显示提示。
+- 底部显示 `Auto-closes in Ns`，60 秒后自动关闭。
+- 填入、复制、关闭或自动关闭都会清除所有标签页中的同一提示。
+
+关闭验证码提示开关会立即清除当前提示，并阻止后续验证码弹出，但不会关闭普通消息通知。
+
+### 排除网站
+
+在 **Excluded websites** 中每行填写一个 hostname：
+
+```text
+example.com
+*.internal.example.com
+```
+
+精确 hostname 只匹配自身；通配规则匹配子域，但不包含根域。不要填写协议、端口或路径。排除规则只保存在扩展本地，并且只影响验证码提示。
+
+浏览器内置页、扩展商店、PDF 查看器、`file://` 页面、跨域 iframe、封闭 Shadow DOM、`contenteditable` 和分段验证码输入框不在支持范围内。扩展不会提交表单或点击网页按钮。
 
 ## 本地私钥
 
-弹窗可以导入 PutSMS 私钥备份 JSON，用于在本地解密 RSA 封装的通知摘要。私钥仅存储在 `browser.storage.local`，不会上传。**Clear Private Keys** 会清除当前 API 与设备凭据对应的本地私钥。
+扩展弹窗支持导入格式版本 1 或 2 的 PutSMS RSA 私钥备份 JSON。保存前会校验元数据，并通过 Web Crypto 导入 PKCS#8 RSA 私钥。密钥只保存在 `browser.storage.local`，不会上传，也不会注入网页 JavaScript。
+
+对于加密短信，扩展会选择与 `recipientKeyId` 匹配的私钥，在本地解密 RSA-OAEP/AES-GCM 摘要。成功解密后才能显示通知预览和识别验证码。提示会使用与 Dashboard 相同的绿色打开锁状态：**Encrypted and unlocked**。缺少或无法使用私钥时，只显示通用加密消息通知，不弹出验证码。
+
+弃用浏览器配置或共用电脑前，请使用 **Clear Private Keys**。
+
+## 安装本地构建
 
 ```bash
 pnpm install
-pnpm dev
+pnpm test
+pnpm typecheck
 pnpm build
 ```
 
-生产构建输出到 `.output/chrome-mv3`。
+在 `chrome://extensions` 或 `edge://extensions` 中开启开发者模式，然后加载 `.output/chrome-mv3`。每次重新构建后都要在扩展卡片上点击**重新加载**；只刷新普通网页不会更新扩展 Service Worker 或 Content Script。
+
+## 权限与隐私
+
+扩展使用通知、离屏文档、存储、标签页、剪贴板写入以及 HTTP/HTTPS 网站访问权限。只有验证码、消息 ID、自动关闭时间、加密状态和显示名称会发送给当前页面的 Content Script；完整短信、Device Key 和私钥不会暴露给网页。

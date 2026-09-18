@@ -22,7 +22,7 @@ Enable Worker observability and source maps. Watch request errors and latency, D
 - A new Device Key can upload, and a rotated/revoked key cannot.
 - Dashboard list, search, contacts, read state, and delete operations work.
 - iOS incremental push/pull converges after offline use.
-- SSE updates arrive and polling recovers after disconnect.
+- SSE updates arrive, clients reconnect after disconnect, and the browser extension performs its latest-message recovery check.
 - APNs Queue drains and a test device receives notification.
 - E2EE ciphertext decrypts only on clients holding a matching private key.
 - CORS rejects an unlisted origin and production clients use HTTPS.

@@ -8,9 +8,15 @@ Install the built Chrome/Edge MV3 extension, open its popup, and configure:
 - **API Base:** your Worker HTTPS origin.
 - **Device Key:** a PutSMS Device Key used as a Bearer credential.
 - **Sound:** whether new-message notifications play the bundled sound.
+- **Show verification code prompts:** offer contextual SMS codes on the active page; enabled by default.
+- **Excluded websites:** exact hosts or `*.example.com` subdomain rules where code prompts must not appear.
 
-The extension maintains one offscreen SSE connection and polls message state as a fallback. The badge shows unread count even when Dashboard is closed.
+The extension maintains one offscreen SSE connection and reconnects automatically. It reads message state after SSE events and connection recovery instead of polling on a timer. The badge and system notifications continue working while Dashboard is closed.
 
-For encrypted summaries, import a PutSMS private-key backup JSON file. Keys stay in `browser.storage.local` and are never uploaded. Use **Clear Private Keys** before disposing of a browser profile or shared computer.
+Verification-code prompts follow the active tab for 60 seconds. Focus an eligible input to move the prompt beside it, then click **Fill code**; the extension never submits the form. Copy, fill, close, or automatic closing clears the prompt everywhere.
 
-<Callout title="Browser permissions">Keep extension permissions limited to the Worker origin you operate. Rotate its Device Key if the browser profile is compromised.</Callout>
+For encrypted summaries, import a version 1 or 2 PutSMS private-key backup JSON file. Keys stay in `browser.storage.local` and are never uploaded. A successfully decrypted encrypted message shows the same green open-lock state as Dashboard and may offer its verification code. Use **Clear Private Keys** before disposing of a browser profile or shared computer.
+
+See [PutSMS Browser Extension](/docs/browser-extension) for installation, permissions, supported fields, and troubleshooting details.
+
+<Callout title="Notification permission">Use **Test notification** to distinguish a browser or operating-system permission problem from an SSE connection problem. Rotate the Device Key if the browser profile is compromised.</Callout>

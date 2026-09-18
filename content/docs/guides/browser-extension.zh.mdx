@@ -8,9 +8,15 @@ description: 使用 Chrome 或 Edge 持续接收桌面通知。
 - **API Base：**你的 Worker HTTPS 地址。
 - **Device Key：**作为 Bearer 凭据使用的 PutSMS Device Key。
 - **声音：**收到新短信时是否播放内置提示音。
+- **显示验证码提示：**在当前网页提供带上下文的短信验证码，默认开启。
+- **排除网站：**不显示验证码提示的精确 hostname 或 `*.example.com` 子域规则。
 
-扩展会维持一条离屏 SSE 连接，并以轮询消息状态作为备用机制。即使 Dashboard 已关闭，角标仍会显示未读数。
+扩展会维持一条离屏 SSE 连接并自动重连。它只在 SSE 事件或连接恢复后读取消息状态，不进行定时轮询。即使 Dashboard 已关闭，未读角标和系统通知仍然有效。
 
-如需解密通知摘要，请导入 PutSMS 私钥备份 JSON。密钥仅保存在 `browser.storage.local`，不会上传。弃用浏览器配置或共用电脑前，请使用**清除私钥**。
+验证码提示会在 60 秒内跟随活动标签页。聚焦合适的输入框后，提示会移动到输入框旁；点击 **Fill code** 填入，但不会提交表单。复制、填入、关闭或自动关闭会在所有页面清除提示。
 
-<Callout title="浏览器权限">将扩展权限限制在你运营的 Worker 地址。浏览器配置遭到泄露时，应轮换对应 Device Key。</Callout>
+如需解密通知摘要，请导入版本 1 或 2 的 PutSMS 私钥备份 JSON。密钥仅保存在 `browser.storage.local`，不会上传。加密短信成功解密后会显示与 Dashboard 相同的绿色打开锁，并可识别其中的验证码。弃用浏览器配置或共用电脑前，请使用 **Clear Private Keys**。
+
+安装、权限、支持的输入框和排障细节见 [PutSMS 浏览器扩展](/zh/docs/browser-extension)。
+
+<Callout title="通知权限">使用 **Test notification** 区分浏览器/操作系统权限问题与 SSE 连接问题。浏览器配置遭到泄露时，应轮换对应 Device Key。</Callout>
