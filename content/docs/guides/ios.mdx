@@ -1,26 +1,97 @@
 ---
 title: iOS App and Shortcuts
-description: Capture messages locally and synchronize them with PutSMS.
+description: Report messages directly from Shortcuts, or use the PutSMS app for reliable capture and synchronization.
 ---
+
+iOS does not allow third-party apps to read the system message inbox directly. Both collection methods therefore begin with a **Shortcuts** personal automation triggered by **Message Received**. The automation extracts the sender, content, and receive time and starts collection. Once configured, it runs when a message arrives without requiring you to open Shortcuts manually.
+
+## Choose a collection method
+
+| Capability | Direct upload from Shortcuts | Shortcuts + PutSMS app |
+| --- | --- | --- |
+| Collection trigger | Shortcuts automation | Shortcuts automation |
+| Configuration | API address and Device Key inside the shortcut | Scan a QR code or import configuration in the app |
+| Local history | Not available | Available |
+| Retry after an offline or failed upload | Not available | Retained locally and uploaded later |
+| Background upload | Not available | Available, subject to iOS scheduling |
+| End-to-end encryption | Not available; HTTPS transport only | PutSMS E2EE supported |
+| Open the app for daily use | No | No |
+| Best suited for | Simple, low-volume use where occasional loss is acceptable | Long-term use or sensitive messages; recommended |
+
+Do not use both methods in the same automation, because doing so can create duplicate records. Use the PutSMS app when you need reliable storage, retry behavior, or end-to-end encryption.
+
+## Option 1: Upload directly from Shortcuts
+
+This method does not call the PutSMS app. Shortcuts sends a request directly to the PutSMS API. Setup is simple, but each run is an independent upload with no local queue or failure recovery.
+
+<Steps>
+
+### Get the Put URL
+
+Create an iOS device in Dashboard and copy the Put URL shown once during setup:
+
+```text
+https://<api-domain>/put/<deviceKey>
+```
+
+### Create the message automation
+
+Create a **Message Received** personal automation in Shortcuts and add a **Get Contents of URL** action. Send a `POST` request to the Put URL and map the message variables to these JSON fields:
+
+```json
+{
+  "sender": "[Sender]",
+  "content": "[Message content]",
+  "receivedAt": "[Receive time]"
+}
+```
+
+`sender` and `content` are required; `receivedAt` is optional. Turn off confirmation before running so the automation can execute when a message arrives.
+
+### Verify the upload
+
+Send a test message, then check the sender, content, time, and source device in [Dashboard Messages](/docs/guides/dashboard).
+
+</Steps>
+
+<Callout type="warn" title="No retry after a failure or network outage">
+  A direct upload succeeds only if the network and API request work during that automation run. Shortcuts does not retain a pending upload, so restoring connectivity does not upload the failed message automatically.
+</Callout>
+
+<Callout type="warn" title="Protect the Device Key">
+  The Put URL contains the Device Key and must be protected like a password. Do not share the shortcut or screenshots containing the full URL. If you rotate the Device Key or change the API address, update the URL in every affected shortcut.
+</Callout>
+
+The shortcut sends plaintext JSON. HTTPS protects the request in transit, but this method does not create PutSMS end-to-end ciphertext, so the server can still access the message content.
+
+## Option 2: Capture with the PutSMS app
+
+Shortcuts still extracts the message, but its final action calls the PutSMS `Record Message` App Intent. The app writes the message to its local database before attempting an immediate upload. If the device is offline or the request fails, the record remains pending for a later sync attempt.
 
 <Steps>
 
 ### Connect the app
 
-Create an iOS device in Dashboard and scan its configuration QR code in PutSMS, or enter the API origin and Device Key manually.
+Create an iOS device in Dashboard. Open PutSMS for initial setup and scan the device configuration QR code, or enter the API address and Device Key manually. After binding the device and granting the required permissions, daily collection does not require the app to remain in the foreground.
 
-### Add the action
+### Add the App Intent
 
-In Shortcuts, add the PutSMS App Intent to the automation that receives or extracts the SMS. Map sender, message content, receive time, and SIM information when available.
+Add the PutSMS `Record Message` action to the **Message Received** automation. Map the sender, content, and receive time to the corresponding parameters; provide Receiver when the receiving number is available. Turn off confirmation before running.
 
-### Test local capture
+### Verify local capture
 
-Run the Shortcut once and confirm the message appears in the app's local list. PutSMS stores it in GRDB first, so a temporary network outage does not discard it.
+Send a test message and confirm that it appears in the PutSMS local history first. Then confirm the cloud record in [Dashboard Messages](/docs/guides/dashboard).
 
-### Enable sync and notifications
+### Verify recovery after a failure
 
-Allow background activity and notifications, then run a sync. The app pushes pending changes and incrementally pulls remote messages.
+Disconnect the network and receive another test message. Confirm that the record remains available locally. Restore connectivity and wait for background synchronization, or open the app and sync manually, then confirm that the pending record appears in Dashboard.
 
 </Steps>
 
-Before selecting **Require encrypted uploads**, register and back up reader keys as described in [End-to-end encryption](/docs/guides/encryption).
+The App Intent can run without manually opening PutSMS, and the app does not need to remain in the foreground. However, iOS schedules background uploads according to conditions such as power, connectivity, and usage. Uploads are not guaranteed to run at a fixed time or always complete in real time.
+
+## End-to-end encryption
+
+The PutSMS app can create end-to-end ciphertext before a message leaves the device. Before enabling **Require encrypted uploads**, configure reader keys and securely back up the private keys as described in [End-to-end encryption](/docs/guides/encryption).
+
+When this setting is enabled and no usable recipient public key is available, the app retains the pending record and stops the upload instead of falling back to plaintext. Direct uploads from Shortcuts do not provide this capability.
