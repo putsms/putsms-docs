@@ -3,7 +3,7 @@ title: PutSMS for Air780EPM
 description: Reliably receive SMS on Air780EPM and forward them to PutSMS.
 ---
 
-This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed uploads remain on the device filesystem and resume after restart or network recovery. It supports existing manual Put URLs and one-time registration by SMS.
+This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed uploads remain on the device filesystem and resume after restart or network recovery. SMS registration is the recommended setup; compatible integrations may also use a manual Put URL or API Key.
 
 <Callout type="warn" title="Current security boundary">Message uploads and enrollment credentials are application-layer plaintext protected by HTTPS. Pending messages and registration commands are plaintext in `/putsms_queue.json`. Air780EPM does not currently support RSA-OAEP or PutSMS E2EE; the pure-Lua RSA-2048 experiment was reverted because it blocked real hardware long enough to trigger module protection.</Callout>
 
@@ -30,12 +30,12 @@ This LuatOS app reliably forwards SMS received by an Air780EPM to PutSMS. Failed
 
 ## SMS enrollment
 
-1. Create an `embedded` device in Dashboard.
-2. Open its connection settings and generate a one-time SMS code.
+1. Create a device in Dashboard and choose `embedded` as its descriptive platform.
+2. In Connect choose **SMS registration** and generate a one-time code.
 3. Send `PUTSMS REG XXXX-XXXX` to the modem SIM.
 4. For a self-hosted API, send `PUTSMS REG XXXX-XXXX https://sms.example.com`.
 
-Codes expire after ten minutes and are single-use. The modem redeems the code for a generated Device Key, persists configuration in `/putsms_device.json`, confirms it with the API, and sends a result SMS. Uploads begin only after confirmation.
+Codes expire after ten minutes and are single-use. The modem redeems the code for a generated Device Key, persists configuration in `/putsms_device.json`, confirms it with the API, and sends a result SMS. Redemption marks the Dashboard device connected. The same device record may instead use Put URL or API Key for manual provisioning when the firmware integration supports it.
 
 Existing manually provisioned devices can retain a Put URL. New devices should leave it empty:
 
@@ -78,7 +78,7 @@ I/putsms.upload.success id 7f31a9c2 status 200 message_id air780epm-... remainin
 - `putsms.queue.full`: queue reached 500 items or 512 KiB.
 - `putsms.queue.corrupt`: neither primary nor backup queue can be parsed; preserve files for investigation.
 
-Use **Unbind device** in Dashboard before moving the modem to another account. Unbinding immediately invalidates its current token and returns the record to pending; generate and send a new registration command to reconnect it.
+Use **Disconnect** in Dashboard before provisioning the modem again. Disconnect immediately invalidates its current token and unused registration code while preserving the device record and messages; choose a method and generate a new credential to reconnect it.
 
 ## Persistence and privacy
 

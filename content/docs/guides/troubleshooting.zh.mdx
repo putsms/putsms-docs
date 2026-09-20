@@ -5,7 +5,8 @@ description: 排查配置、同步、通知和加密问题。
 
 | 现象 | 检查项 |
 | --- | --- |
-| 设备一直等待配置 | API 地址可达性、二维码/配置值和 Device Key 有效性 |
+| 设备一直为 `Ready` | 生成的 Key 尚未完成成功鉴权请求，或 SMS 注册码尚未兑换 |
+| 设备为 `Not connected` | 点击 Status，选择连接方式并生成 Key 或注册码 |
 | `401` 或 `403` | 密钥是否完整、是否撤销、是否属于当前 API 地址 |
 | 短信不同步 | 网络、本地待上传记录、系统后台权限和 API 日志 |
 | Dashboard 或扩展不实时更新 | `/api/v1/events` SSE 请求、CORS 来源、连接状态和重连状态 |
@@ -15,9 +16,10 @@ description: 排查配置、同步、通知和加密问题。
 | iOS 无通知 | 通知权限、APNs 注册、队列消费者、APNs 环境与 Topic |
 | 无法阅读加密短信 | 本地是否有该短信对应的私钥或恢复备份 |
 | 要求加密上传时失败 | 至少注册一个有效且兼容的阅读端公钥 |
-| Air780EPM 注册码失败 | 注册码未使用、仍在十分钟有效期内，且可选 API 地址使用 HTTPS |
-| Air780EPM 一直等待配置 | 蜂窝网络/SNTP、注册回执、`/putsms_device.json` 和确认请求 |
-| Air780EPM 旧 Token 返回 `401` | 设备已解绑，应生成并发送新的注册命令 |
+| Air780EPM 无法连接 | 蜂窝网络/SNTP、注册回执或直传凭据、`/putsms_device.json`，以及 API 地址是否使用 HTTPS |
+| Disconnect 后 Key 返回 `401` | Disconnect 已撤销该 Key；点击 Status 生成新凭据 |
+| SMS 注册码失败 | 注册码未使用、仍在十分钟有效期内，且客户端支持自动兑换 |
+| Air780EPM 旧 Key 返回 `401` | 设备已 Disconnect 或 Key 已替换；打开 Connect，重新配置 Key 或 SMS 注册码 |
 | iOS 导入密钥等待绑定 | 备份与可见来源设备匹配，且 API 可访问 |
 
 Device Key 泄露后应轮换，不要反复使用旧凭据。支持日志中不要发布短信正文、Put URL、私钥或完整请求头。

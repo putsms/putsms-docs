@@ -19,7 +19,8 @@ Enable Worker observability and source maps. Watch request errors and latency, D
 ## Verification checklist
 
 - Registration and sign-in work; OAuth callback returns to the correct frontend.
-- A new Device Key can upload, and a rotated/revoked key cannot.
+- A generated Device Key is `Ready`, becomes `Connected` after successful use, and fails after replacement or Disconnect.
+- SMS registration codes expire after ten minutes, are single-use, and connect the device when redeemed.
 - Dashboard list, search, contacts, read state, and delete operations work.
 - iOS incremental push/pull converges after offline use.
 - SSE updates arrive, clients reconnect after disconnect, and the browser extension performs its latest-message recovery check.

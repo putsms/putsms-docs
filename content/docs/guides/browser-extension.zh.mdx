@@ -3,7 +3,7 @@ title: 浏览器扩展
 description: 使用 Chrome 或 Edge 持续接收桌面通知。
 ---
 
-安装构建后的 Chrome/Edge MV3 扩展，打开弹窗并配置：
+先在 Dashboard 创建设备，在 Connect 中选择 **API Key** 并生成凭据，然后安装构建后的 Chrome/Edge MV3 扩展，打开弹窗并配置：
 
 - **API Base：**你的 Worker HTTPS 地址。
 - **Device Key：**作为 Bearer 凭据使用的 PutSMS Device Key。
@@ -19,4 +19,4 @@ description: 使用 Chrome 或 Edge 持续接收桌面通知。
 
 安装、权限、支持的输入框和排障细节见 [PutSMS 浏览器扩展](/zh/docs/browser-extension)。
 
-<Callout title="通知权限">使用 **Test notification** 区分浏览器/操作系统权限问题与 SSE 连接问题。浏览器配置遭到泄露时，应轮换对应 Device Key。</Callout>
+<Callout title="通知权限">使用 **Test notification** 区分浏览器/操作系统权限问题与 SSE 连接问题。浏览器配置遭到泄露时，应替换 Device Key 或 Disconnect 设备。</Callout>

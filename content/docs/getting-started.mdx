@@ -13,10 +13,14 @@ Open the Dashboard and register with email and password or the configured Google
 
 ### Add a device
 
-Open **Devices**, choose **Add device**, enter a recognizable name, and select the platform. PutSMS creates a Device Key and configuration QR code.
+Open **Devices**, choose **Add device**, enter a recognizable name, and select the platform. Creation saves only the device record, then opens **Connect**. The platform is descriptive and can be changed later without changing the connection.
+
+### Choose a connection method
+
+Choose **API Key** for a Bearer authorization header, **Put URL** when the key must be embedded in the upload URL, or **SMS registration** for an app or device that can redeem a short-lived code. API Key and Put URL create the same long-lived Device Key and differ only in how Dashboard presents it. The key is shown once and does not expire automatically.
 
 <Callout type="warn" title="Save the credentials now">
-  The Device Key is shown during configuration. Treat it like a password: do not place it in source control, screenshots, chat, or logs. Rotate it from the Dashboard if it is exposed.
+  Treat the Device Key or complete Put URL like a password. Do not place it in source control, screenshots, chat, or logs. Generate a replacement or disconnect the device if it is exposed.
 </Callout>
 
 ### Configure a message source
@@ -27,11 +31,11 @@ Choose the matching guide:
 - [Android SmsForwarder](/docs/guides/android)
 - [Air780EPM](/docs/guides/air780epm)
 
-The iOS app can scan the QR configuration. Android SmsForwarder uses the generated Put URL. Air780EPM devices use a one-time SMS enrollment code instead of exposing a Device Key in source files.
+For common setups, use Put URL with iOS Shortcuts or Android SmsForwarder, API Key with an app or browser extension that supports Bearer headers, and SMS registration with the iOS app or Air780EPM firmware when supported.
 
 ### Confirm the connection
 
-Return to **Devices** and check configuration status. A configured client confirms the binding with the API. If it remains pending, verify the API base URL and Device Key.
+Return to **Devices** and check **Status**. `Not connected` means no active credential, `Ready` means a Key or registration code exists but has not been used, and `Connected` means the Key completed a successful request or the SMS code was redeemed. Select the status at any time to reopen **Connect**.
 
 ### Send a test message
 

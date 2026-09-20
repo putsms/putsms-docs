@@ -13,10 +13,14 @@ description: 创建账号、连接设备并接收第一条短信。
 
 ### 添加设备
 
-进入 **Devices**，选择 **Add device**，填写容易识别的名称并选择平台。PutSMS 会生成 Device Key 和配置二维码。
+进入 **Devices**，选择 **Add device**，填写容易识别的名称并选择平台。创建操作只保存设备记录，随后自动打开 **Connect**。平台只是设备描述，之后可以修改，不会改变连接方式。
+
+### 选择连接方式
+
+需要 Bearer 请求头时选择 **API Key**；无法设置请求头、需要把 Key 放入上传地址时选择 **Put URL**；App 或设备能够兑换短期注册码时选择 **SMS registration**。API Key 与 Put URL 生成的是同一种长期 Device Key，只是 Dashboard 的展示方式不同。Key 仅显示一次，且不会自动过期。
 
 <Callout type="warn" title="立即保存凭据">
-  Device Key 只在配置过程中展示。请像密码一样保护它，不要放入源码、截图、聊天或日志。如果发生泄露，请在 Dashboard 中轮换凭据。
+  请像密码一样保护 Device Key 或完整 Put URL，不要放入源码、截图、聊天或日志。发生泄露时应生成替代 Key，或断开设备。
 </Callout>
 
 ### 配置短信来源
@@ -27,11 +31,11 @@ description: 创建账号、连接设备并接收第一条短信。
 - [Android SmsForwarder](/zh/docs/guides/android)
 - [Air780EPM](/zh/docs/guides/air780epm)
 
-iOS App 可以扫描配置二维码；Android SmsForwarder 使用生成的 Put URL。Air780EPM 使用一次性短信注册码，无需在源码中暴露 Device Key。
+常见选择是：iOS 快捷指令与 Android SmsForwarder 使用 Put URL；支持 Bearer Header 的 App 或浏览器扩展使用 API Key；支持自动兑换的 iOS App 或 Air780EPM 固件使用 SMS registration。
 
 ### 确认连接
 
-返回 **Devices** 检查配置状态。客户端成功导入配置后会向 API 确认绑定。如果一直处于等待状态，请检查 API 地址和 Device Key。
+返回 **Devices** 检查 **Status**。`Not connected` 表示没有有效凭据，`Ready` 表示已经生成 Key 或注册码但尚未使用，`Connected` 表示 Key 已成功请求 API，或 SMS 注册码已经兑换。随时点击状态都可以重新打开 **Connect**。
 
 ### 发送测试短信
 

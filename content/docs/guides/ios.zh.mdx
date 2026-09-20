@@ -10,7 +10,7 @@ iOS 不允许第三方 App 直接读取系统短信。因此，无论选择哪�
 | 能力 | 快捷指令直接上报 | 快捷指令 + PutSMS App |
 | --- | --- | --- |
 | 采集触发 | 快捷指令自动化 | 快捷指令自动化 |
-| 配置方式 | 在指令中填写 API 地址和 Device Key | App 扫描二维码或导入配置 |
+| 配置方式 | 使用 Dashboard Connect 生成的 Put URL | SMS registration，或手动填写 API 地址和 Device Key |
 | 本地历史记录 | 不支持 | 支持 |
 | 断网或失败后重试 | 不支持 | 本地保留，后续重新上传 |
 | 后台上传 | 不支持 | 支持，由 iOS 调度 |
@@ -28,7 +28,7 @@ iOS 不允许第三方 App 直接读取系统短信。因此，无论选择哪�
 
 ### 获取 Put URL
 
-在 Dashboard 创建 iOS 设备并复制一次性显示的 Put URL：
+在 Dashboard 创建 iOS 设备，在 Connect 中选择 **Put URL**，生成凭据并复制仅显示一次的地址：
 
 ```text
 https://<api-domain>/put/<deviceKey>
@@ -72,7 +72,7 @@ https://<api-domain>/put/<deviceKey>
 
 ### 连接 App
 
-在 Dashboard 创建 iOS 设备。首次打开 PutSMS，扫描设备配置二维码；也可以手动填写 API 地址和 Device Key。完成初始绑定和所需权限配置后，日常采集不要求 App 保持前台运行。
+在 Dashboard 创建 iOS 设备。App 版本支持自动兑换时可选择 **SMS registration**；也可以选择 **API Key**，手动填写 API 地址和仅显示一次的 Key。完成初始绑定和所需权限配置后，日常采集不要求 App 保持前台运行。
 
 ### 添加 App Intent
 

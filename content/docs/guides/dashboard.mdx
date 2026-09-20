@@ -11,7 +11,9 @@ Register with email and password, or use Google sign-in when your deployment ena
 
 ### Create a device
 
-Open **Devices**, select **Add device**, choose its platform, and give it a recognizable name. Save the one-time Device Key or scan the configuration QR code immediately for regular clients. Embedded devices use **Generate SMS code** instead: send the displayed command to the modem SIM before the ten-minute code expires.
+Open **Devices**, select **Add device**, choose its platform, and give it a recognizable name. Dashboard saves the record and immediately opens **Connect**. Choose API Key, Put URL, or SMS registration; every platform supports all three methods. Platform is descriptive and can be changed later.
+
+The Status column is the connection-management entry point. `Not connected` has no active credential, `Ready` is waiting for first Key use or SMS-code redemption, and `Connected` has completed that first use. Select any status to reopen Connect.
 
 ### Work with messages
 
@@ -19,7 +21,7 @@ Use **Messages** to browse or search by sender and content. Mark messages read o
 
 ### Maintain access
 
-Review connected devices and public keys regularly. Rotate a regular Device Key after accidental disclosure; update the source before revoking the old credential. Embedded credentials cannot be rotated from the regular flow. Use **Unbind device**, then generate and send a new SMS enrollment command; the old token stops working immediately.
+Review connected devices and public keys regularly. A Device Key does not expire automatically. Generate a replacement after accidental disclosure, or choose **Disconnect** to revoke the Key and any unused registration code. Disconnect preserves the device, messages, memo, and encryption-key bindings while resetting connection and sync timestamps.
 
 </Steps>
 

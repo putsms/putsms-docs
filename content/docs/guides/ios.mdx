@@ -10,7 +10,7 @@ iOS does not allow third-party apps to read the system message inbox directly. B
 | Capability | Direct upload from Shortcuts | Shortcuts + PutSMS app |
 | --- | --- | --- |
 | Collection trigger | Shortcuts automation | Shortcuts automation |
-| Configuration | API address and Device Key inside the shortcut | Scan a QR code or import configuration in the app |
+| Configuration | Put URL from Dashboard Connect | SMS registration or manual API address and Device Key |
 | Local history | Not available | Available |
 | Retry after an offline or failed upload | Not available | Retained locally and uploaded later |
 | Background upload | Not available | Available, subject to iOS scheduling |
@@ -28,7 +28,7 @@ This method does not call the PutSMS app. Shortcuts sends a request directly to 
 
 ### Get the Put URL
 
-Create an iOS device in Dashboard and copy the Put URL shown once during setup:
+Create an iOS device in Dashboard. In Connect choose **Put URL**, generate the credential, and copy the URL shown once:
 
 ```text
 https://<api-domain>/put/<deviceKey>
@@ -72,7 +72,7 @@ Shortcuts still extracts the message, but its final action calls the PutSMS `Rec
 
 ### Connect the app
 
-Create an iOS device in Dashboard. Open PutSMS for initial setup and scan the device configuration QR code, or enter the API address and Device Key manually. After binding the device and granting the required permissions, daily collection does not require the app to remain in the foreground.
+Create an iOS device in Dashboard. Use **SMS registration** when the app version can redeem a registration code automatically, or choose **API Key** and enter the API address and one-time-displayed Key manually. After binding the device and granting the required permissions, daily collection does not require the app to remain in the foreground.
 
 ### Add the App Intent
 

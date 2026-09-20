@@ -47,7 +47,7 @@ PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组�
 - **实时事件：**Worker 通过 Durable Object 和 SSE 发布账号事件，Dashboard 与浏览器扩展再向 API 刷新消息状态。
 - **推送通知：**Worker 将 APNs 任务放入队列，发送给符合条件的 iOS 设备。通知内容的隐私边界取决于部署时选择的加密模式。
 - **密钥分发：**阅读客户端注册公钥；每条消息密钥使用 RSA-OAEP-SHA256 为各阅读端封装，私钥无需离开客户端。
-- **Embedded 注册：**Dashboard 生成短期注册码；模组通过短信收到命令，经 HTTPS 兑换生成的 Device Key，持久化后确认配置。解绑会撤销 Token 并重置配对状态。
+- **连接生命周期：**创建设备不会签发凭据。Dashboard 可以把同一个 Device Key 展示为 API Key 或 Put URL，也可以生成短期 SMS 注册码。生成 Key 后只是 Ready；Key 成功使用或 SMS 注册码兑换后才建立连接。Disconnect 会撤销凭据，但不会删除设备数据。
 
 ## 信任边界
 
@@ -55,6 +55,6 @@ PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组�
   iOS 的“要求加密上传”在没有可用接收端公钥时会关闭失败。Android SmsForwarder 和当前 Air780EPM 尚无应用层加密；Air780EPM 的固件能力探测不代表已启用 RSA-OAEP 或 E2EE。HTTPS 保护这些来源的传输，服务端加密保护落盘数据，但 Worker 仍可处理明文。
 </Callout>
 
-Device Key 用于来源设备鉴权，并可独立轮换；浏览器会话用于用户鉴权。`SMS_ENCRYPTION_KEY` 保护服务管理的数据，它不是 E2EE 的替代，因为服务端持有该密钥。
+Device Key 用于来源设备鉴权，不会自动过期，并可独立替换或撤销；浏览器会话用于用户鉴权。设备平台仅用于描述，不限制凭据交付方式。`SMS_ENCRYPTION_KEY` 保护服务管理的数据，它不是 E2EE 的替代，因为服务端持有该密钥。
 
 部署请继续阅读[自部署 PutSMS](/zh/docs/self-hosting)，客户端密钥管理请阅读[端到端加密](/zh/docs/guides/encryption)。

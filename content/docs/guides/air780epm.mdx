@@ -7,11 +7,11 @@ description: Configure reliable SMS forwarding on LuatOS hardware.
 
 ### Prepare the device
 
-Use an Air780EPM with LuatOS V2018 or newer, an internet-capable SIM, and Luatools. Create an `embedded` device in Dashboard.
+Use an Air780EPM with LuatOS V2018 or newer, an internet-capable SIM, and Luatools. Create a device in Dashboard and use `embedded` as its descriptive platform.
 
 ### Generate an enrollment code
 
-Open the embedded device's connection settings and choose **Generate SMS code**. The `XXXX-XXXX` code expires after ten minutes and can be used only once.
+In the Connect dialog choose **SMS registration**, then **Generate code**. This is the recommended provisioning path for compatible firmware. The `XXXX-XXXX` code expires after ten minutes and can be used only once.
 
 ### Send the registration SMS
 
@@ -27,7 +27,7 @@ For a self-hosted API, append its HTTPS origin:
 PUTSMS REG XXXX-XXXX https://sms.example.com
 ```
 
-The device redeems the code, stores its generated credential atomically in `/putsms_device.json`, confirms configuration, and sends a result SMS. Uploads start only after confirmation. Existing manually provisioned devices may retain `put_url`; new devices should leave it empty.
+The device redeems the code, stores its generated credential atomically in `/putsms_device.json`, confirms configuration, and sends a result SMS. Redemption immediately marks the Dashboard device connected. Existing manually provisioned devices may retain `put_url`; direct provisioning can also use Put URL or API Key when the firmware integration supports it, while new SMS-enrolled devices should leave `put_url` empty.
 
 ```lua
 return {
@@ -49,4 +49,4 @@ Flash the Lua files and firmware, wait for cellular and SNTP readiness, then com
 
 </Steps>
 
-Failed uploads remain in a persistent queue and retry after restart or network recovery. The registration command is also queued and uploaded in full after enrollment. Messages and registration commands are plaintext on the hardware and upload as plaintext JSON through HTTPS; restrict physical access. To move the modem to another account, choose **Unbind device**, generate a new code, and send a new registration SMS. See the [project reference](/docs/air780epm) for logs and failure codes.
+Failed uploads remain in a persistent queue and retry after restart or network recovery. The registration command is also queued and uploaded in full after enrollment. Messages and registration commands are plaintext on the hardware and upload as plaintext JSON through HTTPS; restrict physical access. To provision the modem again, choose **Disconnect**, select the desired method, and generate a new credential. See the [project reference](/docs/air780epm) for logs and failure codes.

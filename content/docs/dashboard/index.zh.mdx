@@ -26,10 +26,10 @@ VITE_API_BASE_URL=http://localhost:8787 pnpm dev
 - `pnpm preview`：本地预览生产构建。
 - `pnpm deploy`：部署到 Cloudflare Pages。
 
-API 请求、SSE、Google OAuth 起始地址和设备配置二维码都使用同一个 `VITE_API_BASE_URL`。
+API 请求、SSE、Google OAuth 起始地址和生成的连接地址都使用同一个 `VITE_API_BASE_URL`。
 
-## Embedded 短信注册
+## 设备连接
 
-Embedded 设备使用短信注册，不会在创建弹窗中暴露 Device Key。Dashboard 会生成一次性注册码，显示 `PUTSMS REG` 命令和有效期倒计时，允许填写自定义 HTTPS API 地址，并在模组兑换注册码后检查连接状态。
+创建设备只保存名称和描述性平台，随后打开 Connect 窗口。Status 列是唯一的连接管理入口；所有平台均可使用 API Key、Put URL 或 SMS registration。
 
-已连接的 Embedded 设备可在注册状态菜单中解绑。解绑会立即撤销当前 Token，并将记录恢复为等待配置，以便连接新账号或重新配置。Embedded 设备不能与其他平台相互转换，其凭据也不使用普通轮换界面。
+API Key 与 Put URL 生成同一种长期 Device Key，Dashboard 根据所选方式显示 Bearer Header 或带 Key 的 URL。生成 Key 后状态为 `Ready`，首次成功鉴权请求后才变成 `Connected`。SMS registration 生成十分钟有效、仅可使用一次的注册码，兑换后立即连接。**Disconnect** 会撤销两种凭据并重置连接状态，但不会删除设备及其数据。

@@ -5,7 +5,8 @@ description: Diagnose configuration, synchronization, notification, and encrypti
 
 | Symptom | Check |
 | --- | --- |
-| Device stays pending | API origin reachability, QR/config values, and Device Key validity |
+| Device stays `Ready` | The generated Key has not completed a successful authenticated request, or the SMS registration code has not been redeemed |
+| Device is `Not connected` | Open Status, choose a connection method, and generate a Key or registration code |
 | `401` or `403` | Key copied in full, not revoked, and belongs to the selected API origin |
 | Messages do not sync | Network, pending local records, system background permissions, and API logs |
 | Dashboard or extension does not update live | SSE request to `/api/v1/events`, CORS origin, connection status, and reconnect state |
@@ -15,9 +16,10 @@ description: Diagnose configuration, synchronization, notification, and encrypti
 | No iOS notification | Notification permission, APNs registration, queue consumer, APNs environment/topic |
 | Encrypted message is unreadable | Matching local private key and recovery backup for that message |
 | Required encrypted upload fails | At least one active compatible reader public key must be registered |
-| Air780EPM code fails | Code is unused, within its ten-minute lifetime, and the optional API origin is HTTPS |
-| Air780EPM remains pending | Cellular/SNTP readiness, enrollment reply, `/putsms_device.json`, and confirmation request |
-| Air780EPM old token returns `401` | The device was unbound; generate and send a new enrollment command |
+| Air780EPM does not connect | Cellular/SNTP readiness, the enrollment reply or direct-upload credential, `/putsms_device.json`, and HTTPS API origin |
+| Key returns `401` after Disconnect | Disconnect revoked it; open Status and generate a new credential |
+| SMS registration code fails | The code is unused, within its ten-minute lifetime, and the client supports automatic redemption |
+| Air780EPM old Key returns `401` | The device was disconnected or its Key was replaced; open Connect and configure a new Key or SMS registration code |
 | Imported iOS key is pending | The selected backup matches a visible source device and the API is reachable |
 
 Rotate exposed Device Keys rather than retrying them. Do not post message bodies, Put URLs, private keys, or complete request headers in support logs.

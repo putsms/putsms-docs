@@ -47,7 +47,7 @@ PutSMS separates message capture, cloud coordination, and reading clients. You c
 - **Realtime:** the Worker publishes account events through a Durable Object and SSE. Dashboard and browser extension refresh message state from the API.
 - **Push:** the Worker queues APNs delivery for eligible iOS devices. Treat notification content according to the encryption mode you deploy.
 - **Key distribution:** reading clients register public keys. A message key is wrapped with RSA-OAEP-SHA256 for each reader; private keys never need to leave the client.
-- **Embedded enrollment:** Dashboard creates a short-lived code; the modem receives it by SMS, redeems it over HTTPS for a generated Device Key, persists it, and confirms configuration. Unbinding revokes that token and resets pairing state.
+- **Connection lifecycle:** device creation does not issue a credential. Dashboard presents the shared Device Key as an API Key or Put URL, or creates a short-lived SMS registration code. Key generation is ready but not connected; successful Key use or SMS redemption establishes the connection. Disconnect revokes credentials without deleting device data.
 
 ## Trust boundaries
 
@@ -55,6 +55,6 @@ PutSMS separates message capture, cloud coordination, and reading clients. You c
   **Require encrypted uploads** on iOS fails closed if no usable recipient public key exists. Android SmsForwarder and the current Air780EPM implementation do not perform application-layer encryption. Air780EPM firmware capability probing does not enable RSA-OAEP or E2EE. HTTPS protects these sources in transit, and server-side encryption protects stored plaintext, but the Worker can process that plaintext.
 </Callout>
 
-Device Keys authenticate source devices and can be rotated independently. Browser sessions authenticate people. `SMS_ENCRYPTION_KEY` protects service-managed data at rest; it is not a substitute for E2EE because the service possesses that key.
+Device Keys authenticate source devices, do not expire automatically, and can be replaced or revoked independently. Browser sessions authenticate people. Device platform is descriptive and does not constrain credential delivery. `SMS_ENCRYPTION_KEY` protects service-managed data at rest; it is not a substitute for E2EE because the service possesses that key.
 
 For operational setup, continue to [Self-host PutSMS](/docs/self-hosting). For client key management, read [End-to-end encryption](/docs/guides/encryption).

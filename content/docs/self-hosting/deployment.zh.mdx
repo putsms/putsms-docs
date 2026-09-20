@@ -34,7 +34,7 @@ pnpm db:migrate:remote
 pnpm deploy:worker-only
 ```
 
-依赖新结构的 Worker 上线前必须先应用迁移。切流量前确认 D1、Queue 和 Durable Object 绑定指向预期资源。
+依赖新结构的 Worker 上线前必须先应用迁移。从旧版 Embedded 专用连接模型升级时，必须先应用 `0034_unified_device_connection_methods.sql`，再部署统一连接 Worker。切流量前确认 D1、Queue 和 Durable Object 绑定指向预期资源。
 
 ### 部署 Dashboard
 
@@ -50,7 +50,7 @@ pnpm deploy:worker-only
 
 ### 连接客户端并验证
 
-生产环境只使用 HTTPS。为每个来源创建独立 Device Key，测试上传、同步、SSE、APNs、搜索、密钥轮换以及加密短信完整链路。
+生产环境只使用 HTTPS。创建每个来源设备，选择连接方式并生成凭据，验证状态从 `Ready` 变为 `Connected`，再测试上传、同步、SSE、APNs、搜索、Key 替换、Disconnect 以及加密短信完整链路。
 
 </Steps>
 

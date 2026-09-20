@@ -7,11 +7,11 @@ description: 在 LuatOS 硬件上配置可靠的短信转发。
 
 ### 准备设备
 
-使用 Air780EPM、V2018 或更高版本 LuatOS 固件、可联网 SIM 卡和 Luatools。在 Dashboard 创建 `embedded` 设备。
+使用 Air780EPM、V2018 或更高版本 LuatOS 固件、可联网 SIM 卡和 Luatools。在 Dashboard 创建设备，并使用 `embedded` 作为描述性平台。
 
 ### 生成短信注册码
 
-打开 embedded 设备的连接设置，选择**生成短信注册码**。`XXXX-XXXX` 格式的注册码十分钟后过期，且只能使用一次。
+在 Connect 窗口选择 **SMS registration**，再选择**生成注册码**。这是兼容固件的推荐配置方式。`XXXX-XXXX` 格式的注册码十分钟后过期，且只能使用一次。
 
 ### 发送注册短信
 
@@ -27,7 +27,7 @@ PUTSMS REG XXXX-XXXX
 PUTSMS REG XXXX-XXXX https://sms.example.com
 ```
 
-设备兑换注册码后，将生成的凭据原子写入 `/putsms_device.json`，确认配置并发送结果回执；确认成功后才开始上传。已有手工配置设备可继续保留 `put_url`，新设备应将其留空。
+设备兑换注册码后，将生成的凭据原子写入 `/putsms_device.json`，确认配置并发送结果回执；兑换后 Dashboard 会立即显示 Connected。已有手工配置设备可继续保留 `put_url`；固件集成支持时也可以使用 Put URL 或 API Key 直接配置，而新建的短信注册设备应将 `put_url` 留空。
 
 ```lua
 return {
@@ -49,4 +49,4 @@ return {
 
 </Steps>
 
-上传失败的短信会留在持久化队列，并在重启或网络恢复后重试；注册命令也会入队，并在注册完成后以完整原文上传。当前实现会在硬件上明文保存短信和注册命令，并通过 HTTPS 上传明文 JSON，请限制设备物理访问。需要更换账号时，在 Dashboard **解绑设备**，生成新注册码并重新发送注册短信。日志和错误码参见[项目参考](/zh/docs/air780epm)。
+上传失败的短信会留在持久化队列，并在重启或网络恢复后重试；注册命令也会入队，并在注册完成后以完整原文上传。当前实现会在硬件上明文保存短信和注册命令，并通过 HTTPS 上传明文 JSON，请限制设备物理访问。需要重新配置时，在 Dashboard 使用 **Disconnect**，重新选择连接方式并生成凭据。日志和错误码参见[项目参考](/zh/docs/air780epm)。

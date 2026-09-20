@@ -3,7 +3,7 @@ title: Android SmsForwarder
 description: 将 Android 短信转发到 PutSMS 设备地址。
 ---
 
-在 Dashboard 创建 Android 设备并复制一次性 Put URL：
+在 Dashboard 创建 Android 设备，在 Connect 窗口选择 **Put URL**，生成凭据并复制仅显示一次的地址：
 
 ```text
 https://<worker-domain>/put/<deviceKey>
@@ -21,6 +21,6 @@ https://<worker-domain>/put/<deviceKey>
 }
 ```
 
-发送一条测试短信并在 Dashboard 中确认。`401` 通常表示密钥复制错误、已撤销或已轮换。
+生成后设备状态为 `Ready`。发送一条测试短信并在 Dashboard 中确认状态变为 `Connected`。`401` 通常表示密钥复制错误、已替换，或已被 Disconnect 撤销。
 
 <Callout type="warn" title="当前仅有传输加密">此接入当前通过 HTTPS 发送明文 JSON，不会生成 PutSMS E2EE 密文。请务必使用 HTTPS，并像密码一样保护 Put URL。</Callout>

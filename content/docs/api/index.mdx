@@ -70,18 +70,29 @@ Cloudflare deploy commands can use `npm run deploy:migrated` when schema changes
 
 This Worker does not serve the React frontend. Static routes and assets live in `../putsms-dash`.
 
-Devices report messages with the Device Key returned once when the device is created or its credentials are rotated:
+Device creation returns no credential. An owner first selects one connection presentation method:
+
+```http
+POST /api/v1/devices/:deviceId/connection-method
+Content-Type: application/json
+
+{ "connectionMethod": "api_key" }
+```
+
+Allowed values are `api_key`, `put_url`, and `sms_registration`.
+
+For `api_key` or `put_url`, generate the long-lived Device Key with `POST /api/v1/devices/:deviceId/credentials`. The response reveals `deviceKey`, `putUrl`, and `revealedAt` once. The same Key supports both upload forms:
 
 ```http
 POST /api/v1/messages
 Authorization: Bearer <deviceKey>
 ```
 
-Hardware that cannot set request headers can use `POST /put/:deviceKey`. Both endpoints accept JSON or form-encoded `sender` and `content` fields and share the same validation and storage path.
+Hardware that cannot set request headers can use `POST /put/:deviceKey`. Both endpoints accept JSON or form-encoded `sender` and `content` fields and share the same validation and storage path. A newly generated Key leaves the device `ready`; its first successful authenticated request makes the device `connected`. Keys do not expire automatically.
 
-## Embedded Device Enrollment
+## SMS Registration
 
-Embedded devices do not receive credentials from the normal device-creation response. Dashboard creates a single-use, ten-minute code with:
+After selecting `sms_registration`, Dashboard creates a single-use, ten-minute code for any platform with:
 
 ```http
 POST /api/v1/devices/:deviceId/enrollment-code
@@ -101,6 +112,8 @@ Content-Type: application/json
 }
 ```
 
-Successful redemption returns the API origin, device ID, generated device token, and display ID. Generation and redemption are rate-limited; used codes return `409`, while invalid or expired codes return `400`. Embedded devices cannot switch platform or use regular credential rotation.
+Successful redemption returns the API origin, device ID, generated device token, and display ID, and immediately marks the device connected. Generation and redemption are rate-limited; used codes return `409`, while invalid or expired codes return `400`. Client support determines whether an app or firmware can redeem the code automatically.
 
-To move an embedded device between accounts, the owner calls `POST /api/v1/devices/:deviceId/unenroll`. This clears its credential, pairing and sync state, invalidates unused enrollment codes, and makes the current token fail immediately. The modem must complete a new SMS enrollment afterward.
+For any connection method, the owner calls `POST /api/v1/devices/:deviceId/disconnect`. It revokes the current Key, invalidates unused registration codes, and clears pairing and sync timestamps while preserving the device, messages, memo, and encryption-key bindings. `/unenroll` remains a compatibility alias but is not the recommended endpoint. A connected device must be disconnected before its connection method can change.
+
+Device responses expose `connectionMethod` and `connectionState`. The state is `not_connected` without an active credential, `ready` with an unused Key or active code, and `connected` after successful Key use or SMS redemption.

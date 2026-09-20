@@ -35,11 +35,22 @@ pnpm dev
 - `pnpm db:migrate:local` / `pnpm db:migrate:remote`：应用本地/远端迁移。
 - `pnpm deploy`：迁移并部署；`pnpm deploy:worker-only` 只部署 Worker。
 
-设备可使用 `Authorization: Bearer <deviceKey>` 调用 `POST /api/v1/messages`。无法设置 Header 的硬件可调用 `POST /put/:deviceKey`；两者均接受 JSON 或表单格式的 `sender` 与 `content`。
+创建设备不会返回凭据。所有者先选择一种凭据展示方式：
 
-## Embedded 设备注册
+```http
+POST /api/v1/devices/:deviceId/connection-method
+Content-Type: application/json
 
-创建 Embedded 设备时，普通响应不会直接返回凭据。Dashboard 通过以下接口创建十分钟有效、仅可使用一次的注册码：
+{ "connectionMethod": "api_key" }
+```
+
+允许值为 `api_key`、`put_url` 和 `sms_registration`。
+
+选择 `api_key` 或 `put_url` 后，通过 `POST /api/v1/devices/:deviceId/credentials` 生成长期 Device Key；响应仅显示一次 `deviceKey`、`putUrl` 和 `revealedAt`。同一个 Key 既可通过 `Authorization: Bearer <deviceKey>` 调用 `POST /api/v1/messages`，也可用于 `POST /put/:deviceKey`。两者均接受 JSON 或表单格式的 `sender` 与 `content`。生成 Key 后设备为 `ready`，首次成功鉴权请求后才变为 `connected`；Key 不会自动过期。
+
+## SMS 注册
+
+选择 `sms_registration` 后，任意平台都可以通过以下接口创建十分钟有效、仅可使用一次的注册码：
 
 ```http
 POST /api/v1/devices/:deviceId/enrollment-code
@@ -59,6 +70,8 @@ Content-Type: application/json
 }
 ```
 
-兑换成功后返回 API 地址、设备 ID、生成的 Device Token 和显示 ID。生成与兑换都有限流；已使用注册码返回 `409`，无效或过期返回 `400`。Embedded 设备不能切换平台，也不能使用普通凭据轮换流程。
+兑换成功后返回 API 地址、设备 ID、生成的 Device Token 和显示 ID，并立即将设备标记为已连接。生成与兑换都有限流；已使用注册码返回 `409`，无效或过期返回 `400`。是否能够自动兑换取决于对应 App 或固件的实现。
 
-将 Embedded 设备转移到其他账号时，所有者调用 `POST /api/v1/devices/:deviceId/unenroll`。接口会清除凭据、配对与同步状态，使未使用注册码失效，并立即撤销当前 Token；之后模组必须重新完成短信注册。
+所有连接方式都使用 `POST /api/v1/devices/:deviceId/disconnect` 断开。接口撤销当前 Key、作废未使用注册码，并清除配对和同步时间，但保留设备、短信、备注和加密密钥绑定。`/unenroll` 仅作为兼容别名保留，不再推荐使用。已连接设备必须先 Disconnect，才能切换连接方式。
+
+设备响应包含 `connectionMethod` 和 `connectionState`。没有有效凭据时为 `not_connected`；存在未使用 Key 或有效注册码时为 `ready`；Key 成功使用或 SMS 注册码兑换后为 `connected`。
