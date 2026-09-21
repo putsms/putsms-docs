@@ -90,6 +90,33 @@ Authorization: Bearer <deviceKey>
 
 Hardware that cannot set request headers can use `POST /put/:deviceKey`. Both endpoints accept JSON or form-encoded `sender` and `content` fields and share the same validation and storage path. A newly generated Key leaves the device `ready`; its first successful authenticated request makes the device `connected`. Keys do not expire automatically.
 
+Dashboard offers PutSMS App and Webhook setup to both iOS and Android devices. Platform controls the default recommendation only. Webhook uses the generated `putUrl` and accepts the following canonical shape:
+
+```json
+{
+  "sender": "+15551234567",
+  "receiver": "+15557654321",
+  "content": "Verification code: 123456",
+  "receivedAt": "2026-09-22T08:30:00.000Z",
+  "simSlot": "1",
+  "clientVersion": "your-client/1.0.0"
+}
+```
+
+For SmsForwarder `v3.3.1+`, use this preset with the same Webhook URL:
+
+```json
+{
+  "sender": "{{FROM}}",
+  "content": "{{SMS}}",
+  "receivedAt": "{{RECEIVE_TIME}}",
+  "simSlot": "{{CARD_SLOT}}",
+  "clientVersion": "{{APP_VERSION}}"
+}
+```
+
+Only `sender` and `content` are required. SmsForwarder does not provide a receiver phone-number variable, so its preset omits the optional `receiver`; it may be added as a literal phone number. `CARD_SLOT` and `CARD_SUBID` must not be used as the receiver. The Device Key embedded in the Put URL is the bearer credential, so no separate SmsForwarder secret, `timestamp`, or `sign` is required.
+
 ## SMS Registration
 
 After selecting `sms_registration`, Dashboard creates a single-use, ten-minute code for any platform with:

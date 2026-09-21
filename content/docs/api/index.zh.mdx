@@ -48,6 +48,33 @@ Content-Type: application/json
 
 选择 `api_key` 或 `put_url` 后，通过 `POST /api/v1/devices/:deviceId/credentials` 生成长期 Device Key；响应仅显示一次 `deviceKey`、`putUrl` 和 `revealedAt`。同一个 Key 既可通过 `Authorization: Bearer <deviceKey>` 调用 `POST /api/v1/messages`，也可用于 `POST /put/:deviceKey`。两者均接受 JSON 或表单格式的 `sender` 与 `content`。生成 Key 后设备为 `ready`，首次成功鉴权请求后才变为 `connected`；Key 不会自动过期。
 
+Dashboard 为 iOS 和 Android 设备都提供 PutSMS App 与 Webhook 连接方式；Platform 只决定默认推荐项，不限制可用连接方式。Webhook 使用生成的 `putUrl`，接受以下 canonical JSON：
+
+```json
+{
+  "sender": "+15551234567",
+  "receiver": "+15557654321",
+  "content": "Verification code: 123456",
+  "receivedAt": "2026-09-22T08:30:00.000Z",
+  "simSlot": "1",
+  "clientVersion": "your-client/1.0.0"
+}
+```
+
+SmsForwarder `v3.3.1+` 使用同一个 Webhook URL，并可复制以下预设：
+
+```json
+{
+  "sender": "{{FROM}}",
+  "content": "{{SMS}}",
+  "receivedAt": "{{RECEIVE_TIME}}",
+  "simSlot": "{{CARD_SLOT}}",
+  "clientVersion": "{{APP_VERSION}}"
+}
+```
+
+接口只要求 `sender` 和 `content`。SmsForwarder 没有接收号码模板变量，因此预设省略可选的 `receiver`；用户可填写固定的 SIM 手机号。不得用 `CARD_SLOT` 或 `CARD_SUBID` 代替接收号码。Put URL 内嵌的 Device Key 已是 bearer 凭据，不需要额外的 SmsForwarder Secret、`timestamp` 或 `sign`。
+
 ## SMS 注册
 
 选择 `sms_registration` 后，任意平台都可以通过以下接口创建十分钟有效、仅可使用一次的注册码：
