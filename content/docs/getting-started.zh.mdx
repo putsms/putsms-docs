@@ -29,9 +29,9 @@ description: 创建账号、连接设备并接收第一条短信。
 
 - [iOS App 与快捷指令](/zh/docs/guides/ios)
 - [Android SmsForwarder](/zh/docs/guides/android)
-- [Air780EPM](/zh/docs/guides/air780epm)
+- Embedded：[Air780EPM](/zh/docs/guides/air780epm)
 
-常见选择是：iOS 快捷指令与 Android SmsForwarder 使用 Put URL；支持 Bearer Header 的 App 或浏览器扩展使用 API Key；支持自动兑换的 iOS App 或 Air780EPM 固件使用 SMS registration。
+常见选择是：iOS 快捷指令与 Android SmsForwarder 使用 Put URL；支持 Bearer Header 的 App 或浏览器扩展使用 API Key；支持自动兑换的 iOS App 或兼容的 Embedded 固件（例如当前 Air780EPM 实现）使用 SMS registration。
 
 ### 确认连接
 
@@ -39,7 +39,7 @@ description: 创建账号、连接设备并接收第一条短信。
 
 ### 发送测试短信
 
-运行已配置的快捷指令、转发一条 Android 短信，或向 Air780EPM 的 SIM 卡发送短信。打开 Dashboard 的 **Messages**，核对发送方、正文、接收时间和来源设备。
+运行已配置的快捷指令、转发一条 Android 短信，或向 Embedded 设备（例如 Air780EPM）中的 SIM 卡发送短信。打开 Dashboard 的 **Messages**，核对发送方、正文、接收时间和来源设备。
 
 ### 添加阅读端
 

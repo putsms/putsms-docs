@@ -14,7 +14,7 @@ description: 安全地同步短信，让你可以在需要的地方访问它们�
 
 PutSMS 的初心来自一个实际问题：重要短信应当在需要它的地方可用，同时设备、凭据、部署位置和保护数据的私钥仍由用户掌控。
 
-- 从 iOS 快捷指令与 App Intent、Android SmsForwarder 或 Air780EPM 硬件采集短信。
+- 从 iOS 快捷指令与 App Intent、Android SmsForwarder 或 Embedded 嵌入式硬件（例如 Air780EPM、ESP32-C2 + ML30）采集短信。
 - 在 Dashboard、iOS App 或浏览器扩展中查看和搜索。
 - 通过本地优先存储和增量同步，在网络波动时继续工作。
 - 当所有接收端都准备好公钥时，启用端到端加密上传。
@@ -32,7 +32,7 @@ PutSMS 的初心来自一个实际问题：重要短信应当在需要它的地�
     subgraph Sources[短信来源]
       IOS[iOS 快捷指令与 App Intent]
       AND[Android SmsForwarder]
-      AIR[Air780EPM]
+      EMB[Embedded]
     end
     subgraph Cloud[你的 PutSMS 云端]
       AUTH[会话与 Device Key 鉴权]
@@ -48,7 +48,7 @@ PutSMS 的初心来自一个实际问题：重要短信应当在需要它的地�
     end
     IOS -->|同步上传；可选 E2EE| AUTH
     AND -->|HTTPS Webhook| AUTH
-    AIR -->|HTTPS Webhook| AUTH
+    EMB -->|客户端上传| AUTH
     AUTH --> API
     API --> D1
     API --> RT

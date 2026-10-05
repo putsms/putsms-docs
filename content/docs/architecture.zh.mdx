@@ -9,7 +9,7 @@ PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组�
   subgraph Input[短信输入端]
     SI[iOS 快捷指令 / App Intents]
     SA[Android SmsForwarder]
-    SH[Air780EPM]
+    EMB[Embedded]
   end
   subgraph Edge[Cloudflare 账号]
     AU[会话 / Device Key 鉴权]
@@ -25,7 +25,7 @@ PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组�
   end
   SI -->|上传与同步；可选 E2EE| AU
   SA -->|HTTPS 明文 JSON| AU
-  SH -->|HTTPS 明文 JSON| AU
+  EMB -->|取决于客户端的上传| AU
   AU --> WK
   WK -->|存储 / 查询| DB
   WK -->|发布事件| DO
@@ -42,7 +42,7 @@ PutSMS 将短信采集、云端协调和阅读客户端相互分离。云端组�
 
 ## 数据流
 
-- **上传：**来源设备使用 Device Key 鉴权。iOS 可上传 AES-256-GCM 密文；Android 和 Air780EPM 当前通过 HTTPS 上传明文 JSON。
+- **上传：**来源设备使用 Device Key 鉴权，上传能力取决于具体客户端。iOS 可上传 AES-256-GCM 密文；Android SmsForwarder 和当前 Air780EPM 实现通过 HTTPS 上传明文 JSON。Embedded 来源可以包括 Air780EPM、ESP32-C2 + ML30 及其他兼容硬件。
 - **同步：**iOS App 推送本地 GRDB 中待上传记录，并增量拉取远端变更，不依赖 CloudKit。
 - **实时事件：**Worker 通过 Durable Object 和 SSE 发布账号事件，Dashboard 与浏览器扩展再向 API 刷新消息状态。
 - **推送通知：**Worker 将 APNs 任务放入队列，发送给符合条件的 iOS 设备。通知内容的隐私边界取决于部署时选择的加密模式。

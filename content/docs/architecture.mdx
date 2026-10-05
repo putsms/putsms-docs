@@ -9,7 +9,7 @@ PutSMS separates message capture, cloud coordination, and reading clients. You c
   subgraph Input[Message input]
     SI[iOS Shortcuts / App Intents]
     SA[Android SmsForwarder]
-    SH[Air780EPM]
+    EMB[Embedded]
   end
   subgraph Edge[Cloudflare account]
     AU[Session / Device Key auth]
@@ -25,7 +25,7 @@ PutSMS separates message capture, cloud coordination, and reading clients. You c
   end
   SI -->|upload + sync; optional E2EE| AU
   SA -->|plaintext JSON over HTTPS| AU
-  SH -->|plaintext JSON over HTTPS| AU
+  EMB -->|client-dependent upload| AU
   AU --> WK
   WK -->|store / query| DB
   WK -->|publish event| DO
@@ -42,7 +42,7 @@ PutSMS separates message capture, cloud coordination, and reading clients. You c
 
 ## Data flows
 
-- **Upload:** a source authenticates with its Device Key. iOS can upload an AES-256-GCM ciphertext; Android and Air780EPM currently upload plaintext JSON through HTTPS.
+- **Upload:** a source authenticates with its Device Key. Upload capabilities depend on the client: iOS can upload an AES-256-GCM ciphertext, while Android SmsForwarder and the current Air780EPM implementation upload plaintext JSON through HTTPS. Embedded sources can include Air780EPM, ESP32-C2 + ML30, and other compatible hardware.
 - **Sync:** the iOS app pushes pending local GRDB records and pulls changes incrementally. This is independent of CloudKit.
 - **Realtime:** the Worker publishes account events through a Durable Object and SSE. Dashboard and browser extension refresh message state from the API.
 - **Push:** the Worker queues APNs delivery for eligible iOS devices. Treat notification content according to the encryption mode you deploy.

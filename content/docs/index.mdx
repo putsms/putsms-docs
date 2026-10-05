@@ -14,7 +14,7 @@ SMS messages, verification codes, and device alerts should not be trapped on one
 
 PutSMS began with a practical goal: make important SMS available where you need it without surrendering control of the devices, credentials, deployment, or private keys that protect it.
 
-- Collect messages from iOS Shortcuts and App Intents, Android SmsForwarder, or Air780EPM hardware.
+- Collect messages from iOS Shortcuts and App Intents, Android SmsForwarder, or Embedded hardware such as Air780EPM and ESP32-C2 + ML30.
 - Read and search them from the Dashboard, iOS app, or browser extension.
 - Keep working through local-first storage and incremental synchronization.
 - Enable end-to-end encrypted uploads when every intended reader has a public key.
@@ -32,7 +32,7 @@ PutSMS began with a practical goal: make important SMS available where you need 
     subgraph Sources[Message sources]
       IOS[iOS Shortcuts and App Intents]
       AND[Android SmsForwarder]
-      AIR[Air780EPM]
+      EMB[Embedded]
     end
     subgraph Cloud[Your PutSMS cloud]
       AUTH[Session and Device Key auth]
@@ -48,7 +48,7 @@ PutSMS began with a practical goal: make important SMS available where you need 
     end
     IOS -->|sync push; optional E2EE| AUTH
     AND -->|HTTPS webhook| AUTH
-    AIR -->|HTTPS webhook| AUTH
+    EMB -->|client upload| AUTH
     AUTH --> API
     API --> D1
     API --> RT
